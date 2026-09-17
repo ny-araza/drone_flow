@@ -29,9 +29,8 @@ lint:
 		--check-untyped-defs --exclude .venv/
 
 lint-strict:
-	@$(PY_VENV) -m flake8 . --exclude=.venv && mypy . --strict --warn-return-any \
-		--warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs \
-		--check-untyped-defs --exclude .venv/
+	@$(PY_VENV) -m flake8 . --exclude=.venv && mypy --install-types && \
+		mypy . --strict  --exclude .venv/
 
 sync:
 	@uv sync
