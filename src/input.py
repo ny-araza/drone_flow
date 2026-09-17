@@ -31,18 +31,18 @@ class Input:
 
     @staticmethod
     def check_user_choice(
-            user_choice: str, 
+            user_choice: str,
             sub_folder: list[str]
-        ) -> int:
-            try:
-                choice = int(user_choice)
-                if choice >= 0 and choice < len(sub_folder):
-                    return choice
-                return -1
-            except ValueError:
-                return -1
+            ) -> int:
+        try:
+            choice = int(user_choice)
+            if choice >= 0 and choice < len(sub_folder):
+                return choice
+            return -1
+        except ValueError:
+            return -1
 
-    def choose_level(self) -> str:
+    def choose_level(self) -> None:
         print("")
         print(Fore.RED + "---FLY-IN---" + Style.RESET_ALL)
         print("\nAll the map:\n")
@@ -67,7 +67,6 @@ class Input:
                         self.sub_folder[i]
                     )
                     break
-
 
     def select_map_path(self) -> None:
         print(
@@ -94,4 +93,3 @@ class Input:
                         all_map_path[i]
                     )
                     break
-

@@ -1,7 +1,8 @@
+import os
 import sys
 from .error import ParseError
 from .input import Input
-import os
+from .display import Display
 
 
 if __name__ == "__main__":
@@ -13,7 +14,8 @@ if __name__ == "__main__":
         input: Input = Input(sys.argv[1:][0])
         input.choose_level()
         input.select_map_path()
-        print(input.map_path)
+
+        display: Display = Display(input.map_path)
     except KeyboardInterrupt:
         print("\nPlease be patient!!")
     except Exception as e:
