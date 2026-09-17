@@ -25,7 +25,7 @@ class Input:
             print(Fore.GREEN + self.sub_folder[i] + Style.RESET_ALL)
 
     def choose_map(self) -> str:
-        map_choosen: str = ""
+        self.display_map_choice()
 
         def check_user_choice(user_choice: str) -> int:
             try:
@@ -36,7 +36,7 @@ class Input:
             except ValueError:
                 return -1
 
-        while not map_choosen:
+        while not self.map_choosen:
             choice = check_user_choice(
                 input("\nChoose 0-4 between these maps = ")
             )
@@ -44,6 +44,9 @@ class Input:
                 continue
             for i in range(len(self.sub_folder)):
                 if i == choice:
-                    self.map_choosen = self.sub_folder[i]
-                    return "One map choosen"
+                    self.map_choosen = os.path.join(
+                        self.map_folder,
+                        self.sub_folder[i]
+                    )
+                    break
         return ""
