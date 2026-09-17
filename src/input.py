@@ -15,10 +15,8 @@ class Input:
 
     @staticmethod
     def display_map_choice(
-        sub_folder: list[str]
-        ) -> None:
-        
-
+            sub_folder: list[str]
+            ) -> None:
         for i in range(len(sub_folder)):
             print(i, end=" ")
             print(Fore.GREEN + sub_folder[i] + Style.RESET_ALL)
@@ -32,14 +30,17 @@ class Input:
         return sub_folder
 
     @staticmethod
-    def check_user_choice(user_choice: str) -> int:
-        try:
-            choice = int(user_choice)
-            if choice >= 0 and choice < 5:
-                return choice
-            return -1
-        except ValueError:
-            return -1
+    def check_user_choice(
+            user_choice: str, 
+            sub_folder: list[str]
+        ) -> int:
+            try:
+                choice = int(user_choice)
+                if choice >= 0 and choice < len(sub_folder):
+                    return choice
+                return -1
+            except ValueError:
+                return -1
 
     def choose_level(self) -> str:
         print("")
@@ -51,7 +52,11 @@ class Input:
 
         while not self.map_choosen:
             choice = self.check_user_choice(
-                input(f"\nChoose 0-{len(self.sub_folder) - 1} between these maps = ")
+                input(
+                    f"\nChoose 0-{len(self.sub_folder) - 1} "
+                    "between these maps = "
+                    ),
+                self.sub_folder
             )
             if choice == -1:
                 continue
@@ -62,8 +67,6 @@ class Input:
                         self.sub_folder[i]
                     )
                     break
-
-        return ""
 
 
     def select_map_path(self) -> None:
@@ -76,21 +79,19 @@ class Input:
 
         while not self.map_path:
             choice = self.check_user_choice(
-                input(f"\nChoose 0-{len(all_map_path) - 1} between these maps = ")
+                input(
+                    f"\nChoose 0-{len(all_map_path) - 1} "
+                    "between these maps = "
+                    ),
+                all_map_path
             )
             if choice == -1:
                 continue
             for i in range(len(all_map_path)):
                 if i == choice:
-                    self.map_choosen = os.path.join(
-                        self.map_path,
+                    self.map_path = os.path.join(
+                        self.map_choosen,
                         all_map_path[i]
                     )
                     break
-
-        return ""
-
-
-    def choose_map(self) -> str:
-        pass
 
