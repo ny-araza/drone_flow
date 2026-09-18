@@ -1,5 +1,4 @@
 from enum import Enum
-from pydantic import BaseModel, Field
 
 class TypeZone(Enum):
     NORMAL = "normal"
@@ -20,17 +19,13 @@ class ColorType(Enum):
     LIME = "lime"
     MAGENTA = "magenta"
     GOLD = "gold"
-    
-
-class ZoneValidation(BaseModel):
-    name: str = Field(...)
-    x: int = Field(...)
-    y: int = Field(...)
-    is_start: bool = Field(default=False)
-    is_end: bool = Field(default=False)
-    type: TypeZone = Field(default=TypeZone.NORMAL)
-    color: ColorType = Field(default=ColorType.WHITE)
-    max_drones: int = Field(default=1)
+    BLACK = "black"
+    MAROON = "maroon"
+    DARKRED = "darkred"
+    VIOLET = "violet"
+    CRIMSON = "crimson"
+    RAINBOW = "rainbow"
+    GRAY = "gray"
 
 class Zone:
     def __init__(

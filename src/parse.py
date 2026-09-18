@@ -1,5 +1,6 @@
 from typing import Any
-from .zone import Zone, ZoneValidation
+from .zone import Zone
+from .validation import ZoneValidation
 from .error import ParseError
 from .utils import display_zone
 from pydantic import ValidationError
@@ -37,7 +38,7 @@ def sotck_zones(
     name, x, y = basedata
     if validate_zone(
         name, x, y, metadata_dict
-    ): 
+    ):
         if key == "start_hub":
             list_zones.append(
                 Zone(
@@ -81,6 +82,8 @@ def sotck_zones(
     return list_zones
 
 def parse(data: str) -> tuple[int ,list[Zone]]:
+    if not ("start_hub" in data and "end_hub" in data):
+        raise ParseError("map file must contain 'start_hub' and 'end_hub'")
     temp: list[str] = data.split("\n")
     list_zones: list[Zone] = []
     nb_drones: int = 0
