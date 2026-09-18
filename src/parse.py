@@ -1,6 +1,7 @@
 from typing import Any
 from .zone import Zone
 from .error import ParseError
+from .utils import display_zone
 
 def parse(data: str) -> tuple[int ,list[Zone]]:
     temp: list[str] = data.split("\n")
@@ -32,22 +33,22 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                         )
             metadata: list[str] = []
             basedata: list[str] = []
-            for val in value.split(" ")[1:]:
-                if val.startswith("[") or val.endswith("]"):
-                    metadata.append(val.strip("[]"))
-                    continue
+            for val in value.split(" ")[1:4]:
                 basedata.append(val)
+            for meta_val in value.split(" ")[4:]:
+                temp = meta_val.strip("[]")
+                if temp:
+                    metadata.append(temp)
             if key != "connection":
-                metadata_dict: list[dict[str, Any]] = []
+                metadata_dict: dict[str, Any] = {}
                 name, x, y = basedata
                 for item in metadata:
                     meta_key, meta_value = item.split("=")
                     if len(item.split("=")) != 2:
                         raise ParseError("Metadata must be [meta_data=value]")
-                    metadata_dict.append({
+                    metadata_dict.update({
                         meta_key: meta_value
                     })
-                print(metadata_dict)
                 if key == "start_hub":
                     list_zones.append(
                         Zone(
@@ -56,7 +57,9 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                                 y,
                                 is_start=True,
                                 is_end=False,
-                                
+                                max_drones=metadata_dict.get("max_drones", 1),
+                                color=metadata_dict.get("color", "black"),
+                                type=metadata_dict.get("zone", "normal")
                             ) 
                     )
                 elif key == "end_hub":
@@ -65,9 +68,28 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                                 name,
                                 x,
                                 y,
-                                is_start=True,
+                                is_start=False,
+                                is_end=True,
+                                max_drones=metadata_dict.get("max_drones", 1),
+                                color=metadata_dict.get("color", "black"),
+                                type=metadata_dict.get("zone", "normal"),
+                            ) 
+                    )
+                else:
+                    list_zones.append(
+                        Zone(
+                                name,
+                                x,
+                                y,
+                                is_start=False,
                                 is_end=False,
+                                max_drones=metadata_dict.get("max_drones", 1),
+                                color=metadata_dict.get("color", "black"),
+                                type=metadata_dict.get("zone", "normal"),
                             ) 
                     )
             elif key == "connection":
                 connection = basedata
+
+    display_zone(list_zones)
+
