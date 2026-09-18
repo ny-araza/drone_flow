@@ -6,6 +6,15 @@ from .utils import display_zone
 from pydantic import ValidationError
 
 
+def check_unique_zone_name(
+        name: str, 
+        zones_name: list[str]
+        ) -> list[str]:
+    if name in zones_name:
+        return []
+    zones_name.append(name)
+    return zones_name
+
 def validate_zone(
         name: str,
         x: int,
@@ -33,52 +42,55 @@ def sotck_zones(
         key: str, 
         list_zones: list[Zone],
         basedata: list[str],
-        metadata_dict: dict[str, Any]
+        metadata_dict: dict[str, Any],
+        exists_name: list[str]
         ) -> list[Zone]:
     name, x, y = basedata
-    if validate_zone(
-        name, x, y, metadata_dict
-    ):
-        if key == "start_hub":
-            list_zones.append(
-                Zone(
-                        name,
-                        x,
-                        y,
-                        is_start=True,
-                        is_end=False,
-                        max_drones=metadata_dict.get("max_drones", 1),
-                        color=metadata_dict.get("color", "black"),
-                        type=metadata_dict.get("zone", "normal")
-                    ) 
-            )
-        elif key == "end_hub":
-            list_zones.append(
-                Zone(
-                        name,
-                        x,
-                        y,
-                        is_start=False,
-                        is_end=True,
-                        max_drones=metadata_dict.get("max_drones", 1),
-                        color=metadata_dict.get("color", "black"),
-                        type=metadata_dict.get("zone", "normal"),
-                    ) 
-            )
-        else:
-            list_zones.append(
-                Zone(
-                        name,
-                        x,
-                        y,
-                        is_start=False,
-                        is_end=False,
-                        max_drones=metadata_dict.get("max_drones", 1),
-                        color=metadata_dict.get("color", "black"),
-                        type=metadata_dict.get("zone", "normal"),
-                    ) 
-            )
-
+    if check_unique_zone_name(name, exists_name):
+        if validate_zone(
+            name, x, y, metadata_dict
+        ):
+            if key == "start_hub":
+                list_zones.append(
+                    Zone(
+                            name,
+                            x,
+                            y,
+                            is_start=True,
+                            is_end=False,
+                            max_drones=metadata_dict.get("max_drones", 1),
+                            color=metadata_dict.get("color", "black"),
+                            type=metadata_dict.get("zone", "normal")
+                        ) 
+                )
+            elif key == "end_hub":
+                list_zones.append(
+                    Zone(
+                            name,
+                            x,
+                            y,
+                            is_start=False,
+                            is_end=True,
+                            max_drones=metadata_dict.get("max_drones", 1),
+                            color=metadata_dict.get("color", "black"),
+                            type=metadata_dict.get("zone", "normal"),
+                        ) 
+                )
+            else:
+                list_zones.append(
+                    Zone(
+                            name,
+                            x,
+                            y,
+                            is_start=False,
+                            is_end=False,
+                            max_drones=metadata_dict.get("max_drones", 1),
+                            color=metadata_dict.get("color", "black"),
+                            type=metadata_dict.get("zone", "normal"),
+                        ) 
+                )
+    else:
+        raise ParseError(f"{name} is not an unique zone name")
     return list_zones
 
 def parse(data: str) -> tuple[int ,list[Zone]]:
@@ -87,6 +99,7 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
     temp: list[str] = data.split("\n")
     list_zones: list[Zone] = []
     nb_drones: int = 0
+    exists_name: list[str] = []
     for tmp in temp:
         if not tmp.startswith("#") and tmp:
             item = tmp.split(":")
@@ -121,7 +134,6 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                     metadata.append(temp)
             if key != "connection":
                 metadata_dict: dict[str, Any] = {}
-                name, x, y = basedata
                 for item in metadata:
                     meta_key, meta_value = item.split("=")
                     if len(item.split("=")) != 2:
@@ -133,7 +145,8 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                     key, 
                     list_zones, 
                     basedata, 
-                    metadata_dict
+                    metadata_dict,
+                    exists_name
                     )
             elif key == "connection":
                 connection = basedata
