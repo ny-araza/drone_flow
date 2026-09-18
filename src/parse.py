@@ -93,6 +93,15 @@ def sotck_zones(
         raise ParseError(f"{name} is not an unique zone name")
     return list_zones
 
+def check_key_metadata(keys: list[str]) -> bool:
+    all_key_metadata: list[str] = [
+        "zone", "color", "max_drones"
+    ]
+    for key in keys:
+        if not key in all_key_metadata:
+            return False
+    return True
+
 def parse(data: str) -> tuple[int ,list[Zone]]:
     if not ("start_hub" in data and "end_hub" in data):
         raise ParseError("map file must contain 'start_hub' and 'end_hub'")
@@ -126,8 +135,6 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                         )
             metadata: list[str] = []
             basedata: list[str] = []
-            # for val in value.split(" ")[1:4]:
-            #     basedata.append(val)
             if key != "connection":
                 temp_value = value.split("[")
                 basedata = temp_value[0].strip(" ").split(" ")
@@ -142,6 +149,7 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                     if temp:
                         metadata.append(temp)
                 metadata_dict: dict[str, Any] = {}
+
                 for item in metadata:
                     meta_key, meta_value = item.split("=")
                     if len(item.split("=")) != 2:
@@ -149,6 +157,9 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                     metadata_dict.update({
                         meta_key: meta_value
                 })
+                if not check_key_metadata(list(metadata_dict.keys())):
+                    raise ParseError("metadata key must be 'zone'" \
+                            ", 'color' or 'max_drones'")
                 list_zones = sotck_zones(
                     key, 
                     list_zones, 
