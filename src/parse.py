@@ -126,13 +126,21 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                         )
             metadata: list[str] = []
             basedata: list[str] = []
-            for val in value.split(" ")[1:4]:
-                basedata.append(val)
-            for meta_val in value.split(" ")[4:]:
-                temp = meta_val.strip("[]")
-                if temp:
-                    metadata.append(temp)
+            # for val in value.split(" ")[1:4]:
+            #     basedata.append(val)
             if key != "connection":
+                temp_value = value.split("[")
+                basedata = temp_value[0].strip(" ").split(" ")
+                if len(basedata) != 3:
+                    raise ParseError(
+                        "An error occured on map file line: " \
+                        "line must be: <type_zone>: <zone_name> <pos_x> <pos_y> " \
+                        "[<metadata_key>=<metadata_value>]"
+                        )
+                for meta_val in temp_value[1].split(" "):
+                    temp = meta_val.strip("[]")
+                    if temp:
+                        metadata.append(temp)
                 metadata_dict: dict[str, Any] = {}
                 for item in metadata:
                     meta_key, meta_value = item.split("=")
@@ -140,7 +148,7 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                         raise ParseError("Metadata must be [meta_data=value]")
                     metadata_dict.update({
                         meta_key: meta_value
-                    })
+                })
                 list_zones = sotck_zones(
                     key, 
                     list_zones, 
