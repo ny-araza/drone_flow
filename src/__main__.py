@@ -19,4 +19,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\nPlease be patient!!")
     except Exception as e:
-        print(f"An error occured {e}")
+        pass

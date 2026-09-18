@@ -8,5 +8,6 @@ dependencies = [
     "colorama>=0.4.6",
     "flake8>=7.3.0",
     "mypy>=2.3.1",
+    "pydantic>=2.13.5",
     "pygame>=2.6.1",
 ]

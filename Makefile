@@ -8,7 +8,7 @@ export UV_CACHE_DIR=/home/$(USER)/goinfre/uv_cache
 all:$(TARGET) install uv_add_package
 
 uv_add_package:
-	@uv add pygame colorama flake8 mypy
+	@uv add pygame colorama flake8 mypy pydantic
 
 $(TARGET): $(TOML)
 	@touch $(TARGET)
