@@ -200,10 +200,11 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                             "[<metadata_key>=<metadata_value>]"
                             )
                     key, value = metadata_con
-                    if key != "max_link_capacity":
+                    if key != "max_link_capacity" or int(value) <= 0:
                         raise ParseError(
                             "For connection metadakey must be "
-                            "[max_link_capacity: <metadata_value>]"
+                            "[max_link_capacity: <metadata_value>] "
+                            "(NB: metadata_value > 0)"
                             )
                     try:
                         metadata.update({
