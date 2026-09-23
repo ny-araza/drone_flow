@@ -2,8 +2,8 @@ from typing import Any
 from .zone import Zone
 from .validation import ZoneValidation
 from .error import ParseError
-from .utils import display_zone
 from pydantic import ValidationError
+from .connection import Connection
 
 
 def check_unique_zone_name(
@@ -107,6 +107,7 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
         raise ParseError("map file must contain 'start_hub' and 'end_hub'")
     temp: list[str] = data.split("\n")
     list_zones: list[Zone] = []
+    list_connections: list[Connection] = []
     nb_drones: int = 0
     exists_name: list[str] = []
     for tmp in temp:
@@ -168,6 +169,79 @@ def parse(data: str) -> tuple[int ,list[Zone]]:
                     exists_name
                     )
             elif key == "connection":
-                connection = basedata
+                connect_data = value.split("[")
+                if len(connect_data) > 2:
+                    raise ParseError(
+                        "connection in mapfile must be <zone1>-<zone2> "
+                        "[<metadata_key>=<metadata_value>]"
+                        )
+                temp_base_con: str = ""
+                temp_meta_con: str = ""
+                if len(connect_data) == 1:
+                    temp_base_con = connect_data[0]
+                elif len(connect_data) == 2:
+                    temp_base_con = connect_data[0].strip(" []")
+                    temp_meta_con = connect_data[1].strip(" []")
 
-    display_zone(list_zones)
+                basedata_con = temp_base_con.split("-")
+                if len(basedata_con) != 2:
+                    raise ParseError(
+                        "connection in mapfile must be <zone1>-<zone2> "
+                        "[<metadata_key>=<metadata_value>]"
+                        )
+                
+                metadata_con = ""
+                metadata: dict[str, Any] = {}
+                if temp_meta_con:
+                    metadata_con = temp_meta_con.split("=")
+                    if len(metadata_con) != 2:
+                        raise ParseError(
+                            "connection in mapfile must be <zone1>-<zone2> "
+                            "[<metadata_key>=<metadata_value>]"
+                            )
+                    key, value = metadata_con
+                    if key != "max_link_capacity":
+                        raise ParseError(
+                            "For connection metadakey must be "
+                            "[max_link_capacity: <metadata_value>]"
+                            )
+                    try:
+                        metadata.update({
+                            key: int(value)
+                        })
+                    except ValueError:
+                        raise ParseError(
+                            "In connection: metadata_value must be > 0 and numbers"
+                            )
+                zone1: Zone = Zone(
+                    name="",
+                    color="",
+                    is_end=False,
+                    is_start=False,
+                    max_drones=1,
+                    type="normal",
+                    x=0,
+                    y=0,
+                )
+                zone2: Zone = Zone(
+                    name="",
+                    color="",
+                    is_end=False,
+                    is_start=False,
+                    max_drones=1,
+                    type="normal",
+                    x=0,
+                    y=0,
+                )
+                for zone in list_zones:
+                    if zone.name == basedata_con[0].strip(" "):
+                        zone1 = zone
+                        break
+                for zone in list_zones:
+                    if zone.name == basedata_con[1].strip(" "):
+                        zone2 = zone
+                        break
+                connection: Connection = Connection(zone1, zone2, metadata)
+                list_connections.append(connection)
+    for conn in list_connections:
+        print(f"{conn.zone1.name}-{conn.zone2.name} [{conn.metadata}]")
