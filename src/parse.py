@@ -4,7 +4,6 @@ from .validation import ZoneValidation
 from .error import ParseError
 from pydantic import ValidationError
 from .connection import Connection
-from .utils import read_file
 
 
 class Parse:
@@ -248,5 +247,3 @@ class Parse:
                             break
                     connection: Connection = Connection(zone1, zone2, metadata)
                     self.list_connections.append(connection)
-        for conn in self.list_connections:
-            print(f"{conn.zone1.name}-{conn.zone2.name} [{conn.metadata}]")

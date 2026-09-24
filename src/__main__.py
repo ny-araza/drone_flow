@@ -2,7 +2,7 @@ import os
 import sys
 from .error import ParseError
 from .input import Input
-from .display import Display
+from .display import Display, tes_display
 
 
 if __name__ == "__main__":
@@ -16,6 +16,7 @@ if __name__ == "__main__":
         input.select_map_path()
 
         display: Display = Display(input.map_path)
+        tes_display()
     except KeyboardInterrupt:
         print("\nPlease be patient!!")
     except Exception as e:
