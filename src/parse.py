@@ -186,13 +186,13 @@ class Parse:
                         temp_base_con = connect_data[0].strip(" []")
                         temp_meta_con = connect_data[1].strip(" []")
 
+                    print(temp_base_con.split(" "))
                     basedata_con = temp_base_con.split("-")
-                    if len(basedata_con) != 2 or " " in temp_base_con:
+                    if len(basedata_con) != 2:
                         raise ParseError(
                             "connection in mapfile must be <zone1>-<zone2> "
                             "[<metadata_key>=<metadata_value>]"
                             )
-                    
                     metadata_con = ""
                     metadata: dict[str, Any] = {}
                     if temp_meta_con:
