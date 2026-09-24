@@ -187,7 +187,7 @@ class Parse:
                         temp_meta_con = connect_data[1].strip(" []")
 
                     basedata_con = temp_base_con.split("-")
-                    if len(basedata_con) != 2:
+                    if len(basedata_con) != 2 or " " in temp_base_con:
                         raise ParseError(
                             "connection in mapfile must be <zone1>-<zone2> "
                             "[<metadata_key>=<metadata_value>]"
