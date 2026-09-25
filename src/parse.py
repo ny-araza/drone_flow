@@ -185,7 +185,6 @@ class Parse:
                     elif len(connect_data) == 2:
                         temp_base_con = connect_data[0].strip(" []")
                         temp_meta_con = connect_data[1].strip(" []")
-
                     print(temp_base_con.split(" "))
                     basedata_con = temp_base_con.split("-")
                     if len(basedata_con) != 2:
