@@ -61,34 +61,36 @@ class Parse:
                     self.list_zones.append(
                         Zone(
                                 name,
-                                x,
-                                y,
+                                int(x),
+                                int(y),
                                 is_start=True,
                                 is_end=False,
                                 max_drones=metadata_dict.get("max_drones", 1),
                                 color=metadata_dict.get("color", "black"),
-                                type=metadata_dict.get("zone", "normal")
+                                type=metadata_dict.get("zone", "normal"),
+                                image="./images/start_hub.png"
                             ) 
                     )
                 elif key == "end_hub":
                     self.list_zones.append(
                         Zone(
                                 name,
-                                x,
-                                y,
+                                int(x),
+                                int(y),
                                 is_start=False,
                                 is_end=True,
                                 max_drones=metadata_dict.get("max_drones", 1),
                                 color=metadata_dict.get("color", "black"),
                                 type=metadata_dict.get("zone", "normal"),
+                                image="./images/end_hub_50x50.png"
                             ) 
                     )
                 else:
                     self.list_zones.append(
                         Zone(
                                 name,
-                                x,
-                                y,
+                                int(x),
+                                int(y),
                                 is_start=False,
                                 is_end=False,
                                 max_drones=metadata_dict.get("max_drones", 1),

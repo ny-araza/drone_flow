@@ -30,12 +30,13 @@ class ColorType(Enum):
 class Zone:
     def __init__(
             self, name: str, 
-            x: int, y: int, 
+            x: int, y: int,
             is_start: bool = False, 
             is_end: bool = False,
             type: TypeZone = TypeZone.NORMAL,
             max_drones: int = 1,
-            color: ColorType = ColorType.WHITE  
+            color: ColorType = ColorType.WHITE,
+            image: str = ""
             ):
         self.name = name
         self.x = x
@@ -45,3 +46,4 @@ class Zone:
         self.type = type
         self.max_drones = max_drones
         self.color = color
+        self.image = image
