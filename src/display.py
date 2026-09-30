@@ -20,7 +20,6 @@ class Display:
         self.height = height
         self.size_pixel = size_pixel
         self.cell_size = cell_size
-
         self.list_rect = []
         pg.init()
         self.screen = pg.display.set_mode((self.width, self.height))
@@ -28,41 +27,74 @@ class Display:
 
     def display_window(self) -> None:
         running = True
+        dragging = False
 
         boxes = []
+        color = []
+
+        offset_x = 0
+        offset_y = 0
 
         for zone in self.parse.list_zones:
             new_x, new_y = zone.x * self.cell_size, zone.y * self.cell_size
             temp = pg.Rect(new_x, new_y, self.cell_size, self.cell_size)
             boxes.append(temp)
+            color.append(zone.color)
 
-        print(boxes)
-
-        active_box = None
         while running:
+
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
 
-                if event.type == pg.MOUSEBUTTONDOWN:
+                elif event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
-                        for num, box in enumerate(boxes):
-                            if box.collidepoint(event.pos):
-                                active_box = num
+                        dragging = True
 
-                if event.type == pg.MOUSEMOTION:
-                    if active_box != None:
+                    elif event.button == 4:
+                        self.cell_size += 5
+                        for i, zone in enumerate(self.parse.list_zones):
+                            boxes[i].w = self.cell_size
+                            boxes[i].h = self.cell_size
+
+                            boxes[i].x = (
+                                zone.x * self.cell_size + offset_x
+                            )
+
+                            boxes[i].y = (
+                                zone.y * self.cell_size + offset_y
+                            )
+
+                    elif event.button == 5:
+                        self.cell_size -= 5
+                        for i, zone in enumerate(self.parse.list_zones):
+                            boxes[i].w = self.cell_size
+                            boxes[i].h = self.cell_size
+
+                            boxes[i].x = (
+                                zone.x * self.cell_size + offset_x
+                            )
+                            
+                            boxes[i].y = (
+                                zone.y * self.cell_size + offset_y
+                            )
+
+                elif event.type == pg.MOUSEMOTION:
+                    if dragging:
                         for box in boxes:
-                            box.move_ip(event.rel)
-                
-                if event.type == pg.MOUSEBUTTONUP:
-                    active_box = None
+                            dx, dy = event.rel
+                            box.move_ip((dx, dy))
+
+                        offset_x += dx
+                        offset_y += dy
+
+                elif event.type == pg.MOUSEBUTTONUP:
+                    if event.button == 1:
+                        dragging = False
 
             self.screen.fill((0, 0, 0))
 
-            for box in boxes:
-                pg.draw.rect(self.screen, color_rgb["PURPLE"], box)
-
+            for i, box in enumerate(boxes):
+                pg.draw.rect(self.screen, color_rgb[color[i].upper()], box)
 
             pg.display.flip()
-    
