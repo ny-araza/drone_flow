@@ -37,8 +37,19 @@ class Display:
 
         for zone in self.parse.list_zones:
             new_x, new_y = zone.x * self.cell_size, zone.y * self.cell_size
-            temp = pg.Rect(new_x, new_y, self.cell_size, self.cell_size)
-            boxes.append(temp)
+
+            rect_initial_pos = pg.Rect(
+                new_x, new_y,
+                self.cell_size // 2, self.cell_size // 2
+            )
+                            
+            center_x = new_x + self.cell_size // 2
+            center_y = new_y + self.cell_size // 2
+            
+            rect_initial_pos.center = (center_x, center_y)
+
+            # temp = pg.Rect(new_x, new_y, self.cell_size, self.cell_size)
+            boxes.append(rect_initial_pos)
             color.append(zone.color)
 
         while running:
@@ -54,8 +65,8 @@ class Display:
                     elif event.button == 4:
                         self.cell_size += 5
                         for i, zone in enumerate(self.parse.list_zones):
-                            boxes[i].w = self.cell_size
-                            boxes[i].h = self.cell_size
+                            boxes[i].w = self.cell_size // 2
+                            boxes[i].h = self.cell_size // 2
 
                             boxes[i].x = (
                                 zone.x * self.cell_size + offset_x
@@ -68,8 +79,8 @@ class Display:
                     elif event.button == 5:
                         self.cell_size -= 5
                         for i, zone in enumerate(self.parse.list_zones):
-                            boxes[i].w = self.cell_size
-                            boxes[i].h = self.cell_size
+                            boxes[i].w = self.cell_size // 2
+                            boxes[i].h = self.cell_size // 2
 
                             boxes[i].x = (
                                 zone.x * self.cell_size + offset_x
@@ -95,6 +106,8 @@ class Display:
             self.screen.fill((0, 0, 0))
 
             for i, box in enumerate(boxes):
+
+                
                 pg.draw.rect(self.screen, color_rgb[color[i].upper()], box)
 
             pg.display.flip()
