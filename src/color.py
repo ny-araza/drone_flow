@@ -22,4 +22,5 @@ color_rgb: dict[str, Any] = {
     "CRIMSON":   (220, 20, 60),
     "RAINBOW":   (255, 0, 255),
     "GRAY":      (128, 128, 128),
+    "BLACK":     (0, 0, 0)
 }

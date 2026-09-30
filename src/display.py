@@ -4,11 +4,12 @@ import pygame as pg
 from .color import color_rgb
 from typing import Any
 
+
 class Display:
     def __init__(
             self, map_path: str,
-            width: int = 1500,
-            height: int = 900,
+            width: int = 1280,
+            height: int = 960,
             size_pixel: int = 50,
             cell_size: int = 60
             ):
@@ -20,79 +21,48 @@ class Display:
         self.size_pixel = size_pixel
         self.cell_size = cell_size
 
+        self.list_rect = []
         pg.init()
         self.screen = pg.display.set_mode((self.width, self.height))
         self.clock = pg.time.Clock()
 
     def display_window(self) -> None:
-        runing = True
-        while runing:
-            for event in pg.event.get():
-                if event.type == pg.MOUSEMOTION:
-                    print(pg.mouse.get_pos())
-                if event.type == pg.QUIT:
-                    runing = False
-            self.display_zone()
-            pg.display.flip()
-            self.clock.tick(60)
-        pg.quit()
+        running = True
 
-    def display_images(
-        self, pos_x: int, 
-        pos_y: int, path: str,
-        is_start: bool = False
-    ) -> None:
-        rx = pos_x
-        ry = pos_y
-        image_loaded = pg.image.load(path).convert_alpha()
-        self.screen.blit(image_loaded, (rx, ry))
+        boxes = []
 
-    def display_connection(self) -> None:
-        self.screen.fill("purple")
-        for index, zone in enumerate(self.parse.list_zones):
-            if zone.is_start or zone.is_end:
-                self.display_images(zone.x, zone.y, zone.image, zone.is_start)
-
-    def draw_circle(
-            self, pos_x: int, 
-            pos_y: int, color: tuple[int, int, int],
-            width: int
-            ) -> None:
-        pg.draw.circle(
-            self.screen, 
-            color,
-            (pos_x, pos_y),
-            width
-            )
-
-    def draw_rect(
-            self,
-            color: tuple[int, int, int],
-            pos_x, pos_y,
-            width: int,
-            height: int
-    ) -> None:
-        pg.draw.rect(
-            self.screen,
-            color,
-            pg.Rect(pos_x, pos_y, width, height)
-        )
-
-    def display_zone(self) -> None:
         for zone in self.parse.list_zones:
-            new_x = zone.x * self.cell_size
-            new_y = zone.y * self.cell_size
-            
-            rect_initial_pos = pg.Rect(
-                new_x, new_y,
-                self.cell_size // 2, self.cell_size // 2
-            )
+            new_x, new_y = zone.x * self.cell_size, zone.y * self.cell_size
+            temp = pg.Rect(new_x, new_y, self.cell_size, self.cell_size)
+            boxes.append(temp)
 
-            center_x = new_x + self.cell_size // 2
-            center_y = new_y + self.cell_size // 2
+        print(boxes)
 
-            rect_initial_pos.center = (center_x, center_y)
-            pg.draw.rect(
-                self.screen, color_rgb[zone.color.upper()], 
-                rect_initial_pos, 0
-            )
+        active_box = None
+        while running:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    running = False
+
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    if event.button == 1:
+                        for num, box in enumerate(boxes):
+                            if box.collidepoint(event.pos):
+                                active_box = num
+
+                if event.type == pg.MOUSEMOTION:
+                    if active_box != None:
+                        for box in boxes:
+                            box.move_ip(event.rel)
+                
+                if event.type == pg.MOUSEBUTTONUP:
+                    active_box = None
+
+            self.screen.fill((0, 0, 0))
+
+            for box in boxes:
+                pg.draw.rect(self.screen, color_rgb["PURPLE"], box)
+
+
+            pg.display.flip()
+    
