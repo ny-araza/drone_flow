@@ -1,18 +1,21 @@
-from .utils import Utils
-from .parse import Parse
-import pygame as pg
-from .color import color_rgb
 from typing import Any
+
+import pygame as pg
+
+from .color import color_rgb
+from .parse import Parse
+from .utils import Utils
 
 
 class Display:
     def __init__(
-            self, map_path: str,
-            width: int = 1280,
-            height: int = 960,
-            size_pixel: int = 50,
-            cell_size: int = 60
-            ):
+        self,
+        map_path: str,
+        width: int = 1280,
+        height: int = 960,
+        size_pixel: int = 50,
+        cell_size: int = 60,
+    ):
         self.parse: Parse = Parse()
         temp_data = Utils.read_file(map_path)
         self.parse.parse(temp_data)
@@ -24,6 +27,7 @@ class Display:
         pg.init()
         self.screen = pg.display.set_mode((self.width, self.height))
         self.clock = pg.time.Clock()
+        self.font = pg.font.Font(None, 24)
 
     def display_window(self) -> None:
         running = True
@@ -39,21 +43,23 @@ class Display:
             new_x, new_y = zone.x * self.cell_size, zone.y * self.cell_size
 
             rect_initial_pos = pg.Rect(
-                new_x, new_y,
-                self.cell_size // 2, self.cell_size // 2
+                new_x, new_y, self.cell_size // 2, self.cell_size // 2
             )
-                            
+
             center_x = new_x + self.cell_size // 2
             center_y = new_y + self.cell_size // 2
-            
+
             rect_initial_pos.center = (center_x, center_y)
 
-            # temp = pg.Rect(new_x, new_y, self.cell_size, self.cell_size)
             boxes.append(rect_initial_pos)
             color.append(zone.color)
 
-        while running:
+        rect_center_point = []
 
+        for conn in self.parse.list_connections:
+            print(conn.zone1.name, " < == > ", conn.zone2.name)
+
+        while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
@@ -68,13 +74,9 @@ class Display:
                             boxes[i].w = self.cell_size // 2
                             boxes[i].h = self.cell_size // 2
 
-                            boxes[i].x = (
-                                zone.x * self.cell_size + offset_x
-                            )
+                            boxes[i].x = zone.x * self.cell_size + offset_x
 
-                            boxes[i].y = (
-                                zone.y * self.cell_size + offset_y
-                            )
+                            boxes[i].y = zone.y * self.cell_size + offset_y
 
                     elif event.button == 5:
                         self.cell_size -= 5
@@ -82,13 +84,9 @@ class Display:
                             boxes[i].w = self.cell_size // 2
                             boxes[i].h = self.cell_size // 2
 
-                            boxes[i].x = (
-                                zone.x * self.cell_size + offset_x
-                            )
-                            
-                            boxes[i].y = (
-                                zone.y * self.cell_size + offset_y
-                            )
+                            boxes[i].x = zone.x * self.cell_size + offset_x
+
+                            boxes[i].y = zone.y * self.cell_size + offset_y
 
                 elif event.type == pg.MOUSEMOTION:
                     if dragging:
@@ -105,9 +103,34 @@ class Display:
 
             self.screen.fill((0, 0, 0))
 
-            for i, box in enumerate(boxes):
+            rect_center_point = []
 
-                
+            for i, box in enumerate(boxes):
                 pg.draw.rect(self.screen, color_rgb[color[i].upper()], box)
+
+                text = self.font.render(
+                    self.parse.list_zones[i].name, True, color_rgb["WHITE"]
+                )
+
+                text_rect = text.get_rect()
+                text_rect.midtop = (box.centerx, box.bottom + 5)
+
+                self.screen.blit(text, text_rect)
+
+            # Dessiner les connexions
+            for conn in self.parse.list_connections:
+                zone1_pos = (0, 0)
+                zone2_pos = (0, 0)
+
+                for zone in self.parse.list_zones:
+                    if conn.zone1.name == zone.name:
+                        index = self.parse.list_zones.index(zone)
+                        zone1_pos = boxes[index].center
+
+                    if conn.zone2.name == zone.name:
+                        index = self.parse.list_zones.index(zone)
+                        zone2_pos = boxes[index].center
+
+                pg.draw.line(self.screen, color_rgb["WHITE"], zone1_pos, zone2_pos, 2)
 
             pg.display.flip()
