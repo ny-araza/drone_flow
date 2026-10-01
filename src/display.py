@@ -54,11 +54,6 @@ class Display:
             boxes.append(rect_initial_pos)
             color.append(zone.color)
 
-        rect_center_point = []
-
-        for conn in self.parse.list_connections:
-            print(conn.zone1.name, " < == > ", conn.zone2.name)
-
         while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
@@ -69,16 +64,22 @@ class Display:
                         dragging = True
 
                     elif event.button == 4:
+                        if self.cell_size >= 200:
+                            break
                         self.cell_size += 5
                         for i, zone in enumerate(self.parse.list_zones):
                             boxes[i].w = self.cell_size // 2
                             boxes[i].h = self.cell_size // 2
 
+
                             boxes[i].x = zone.x * self.cell_size + offset_x
 
                             boxes[i].y = zone.y * self.cell_size + offset_y
 
+
                     elif event.button == 5:
+                        if self.cell_size <= 30:
+                            break
                         self.cell_size -= 5
                         for i, zone in enumerate(self.parse.list_zones):
                             boxes[i].w = self.cell_size // 2
@@ -103,8 +104,6 @@ class Display:
 
             self.screen.fill((0, 0, 0))
 
-            rect_center_point = []
-
             for i, box in enumerate(boxes):
                 pg.draw.rect(self.screen, color_rgb[color[i].upper()], box)
 
@@ -117,7 +116,6 @@ class Display:
 
                 self.screen.blit(text, text_rect)
 
-            # Dessiner les connexions
             for conn in self.parse.list_connections:
                 zone1_pos = (0, 0)
                 zone2_pos = (0, 0)
