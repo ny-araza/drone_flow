@@ -10,6 +10,7 @@ class Parse:
     def __init__(self):
         self.list_connections: list[Connection] = []
         self.list_zones: list[Zone] = []
+        self.nb_drones: int = 0
 
     def check_unique_zone_name(
             self,
@@ -114,7 +115,6 @@ class Parse:
         if not ("start_hub" in data and "end_hub" in data):
             raise ParseError("map file must contain 'start_hub' and 'end_hub'")
         temp: list[str] = data.split("\n")
-        nb_drones: int = 0
         exists_name: list[str] = []
         for tmp in temp:
             if not tmp.startswith("#") and tmp:
@@ -127,15 +127,15 @@ class Parse:
                 key, value = item
                 if key == "nb_drones" :
                     try:
-                        nb_drones = int(value)
-                        if nb_drones < 0:
+                        self.nb_drones = int(value)
+                        if self.nb_drones < 0:
                             raise ParseError(
                                 "'nb_drones' must be " \
                                 "int and positive"
                                 )
                         continue
                     except ValueError:
-                        nb_drones = 0
+                        self.nb_drones = 0
                         raise ParseError(
                             "'nb_drones' must be " \
                             "int and positive"
