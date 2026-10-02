@@ -76,6 +76,31 @@ class Display:
                 if event.type == pg.QUIT:
                     running = False
 
+                if event.type == pg.KEYDOWN:
+                    if event.key == 1073741910:
+                        if self.cell_size <= 30:
+                            break
+                        self.cell_size -= 5
+                        for i, zone in enumerate(self.parse.list_zones):
+                            boxes[i].w = self.cell_size // 2
+                            boxes[i].h = self.cell_size // 2
+
+                            boxes[i].x = zone.x * self.cell_size + offset_x
+
+                            boxes[i].y = zone.y * self.cell_size + offset_y
+
+                    if event.key == 1073741911:
+                        if self.cell_size >= 200:
+                            break
+                        self.cell_size += 5
+                        for i, zone in enumerate(self.parse.list_zones):
+                            boxes[i].w = self.cell_size // 2
+                            boxes[i].h = self.cell_size // 2
+
+                            boxes[i].x = zone.x * self.cell_size + offset_x
+
+                            boxes[i].y = zone.y * self.cell_size + offset_y
+
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         dragging = True
@@ -96,6 +121,7 @@ class Display:
                         if self.cell_size <= 30:
                             break
                         self.cell_size -= 5
+                        self.font.size("24")
                         for i, zone in enumerate(self.parse.list_zones):
                             boxes[i].w = self.cell_size // 2
                             boxes[i].h = self.cell_size // 2
@@ -129,9 +155,7 @@ class Display:
                 text_rect = text.get_rect()
                 text_rect.midtop = (box.centerx, box.bottom + 5)
 
-                self.screen.blit(text, text_rect)
-
-                    
+                self.screen.blit(text, text_rect)        
 
             for conn in self.parse.list_connections:
                 zone1_pos = (0, 0)
