@@ -1,13 +1,19 @@
-from typing import Any
-
 import pygame as pg
 
 from src.drones import Drone
+from src.planner import Planner
 from src.zone import Zone
 
 from .color import color_rgb
 from .parse import Parse
 from .utils import Utils
+
+MIN_CELL = 30
+MAX_CELL = 200
+ZOOM_STEP = 5
+FPS = 60
+MAX_ZONE_FONT = 24
+MIN_ZONE_FONT = 10
 
 
 class Display:
@@ -24,160 +30,185 @@ class Display:
         self.parse.parse(temp_data)
         self.width = width
         self.height = height
-        self.size_pixel = size_pixel
         self.cell_size = cell_size
         self.list_rect = []
+        self.boxes: list[pg.Rect] = []
+        self.offset_x = 0
+        self.offset_y = 0
         pg.init()
         self.screen = pg.display.set_mode((self.width, self.height))
         self.clock = pg.time.Clock()
         self.font = pg.font.Font(None, 24)
 
+    def _update_boxes(self) -> None:
+        """Recalcule taille et position de chaque box (même formule que
+        l'initialisation : centre = coord * cell_size + cell_size // 2)."""
+        half = self.cell_size // 2
+        for box, zone in zip(self.boxes, self.parse.list_zones):
+            box.size = (half, half)
+            box.center = (
+                zone.x * self.cell_size + half + self.offset_x,
+                zone.y * self.cell_size + half + self.offset_y,
+            )
+
+    def _zoom(self, step: int) -> None:
+        new_size = self.cell_size + step
+        if not MIN_CELL <= new_size <= MAX_CELL:
+            return
+        self.cell_size = new_size
+        self._update_boxes()
+
     def display_window(self) -> None:
         running = True
         dragging = False
 
-        boxes = []
-        color = []
+        zones = self.parse.list_zones
+        zone_index = {zone.name: i for i, zone in enumerate(zones)}
 
-        offset_x = 0
-        offset_y = 0
+        start_zone: Zone = Zone(
+            name="start",
+            x=0,
+            y=0,
+            color=color_rgb["WHITE"],
+        )
+        colors = []
 
-        start_box_x = 0
-        start_box_y = 0
-
-        for zone in self.parse.list_zones:
-            new_x, new_y = zone.x * self.cell_size, zone.y * self.cell_size
-
-            rect_initial_pos = pg.Rect(
-                new_x, new_y, self.cell_size // 2, self.cell_size // 2
-            )
-
-            center_x = new_x + self.cell_size // 2
-            center_y = new_y + self.cell_size // 2
-
+        for zone in zones:
+            self.boxes.append(pg.Rect(0, 0, 0, 0))
+            colors.append(zone.color)
             if zone.is_start:
-                start_box_x = center_x
-                start_box_y = center_y
+                start_zone = zone
 
-            rect_initial_pos.center = (center_x, center_y)
+        self._update_boxes()
 
-            boxes.append(rect_initial_pos)
-            color.append(zone.color)
+        planner = Planner(zones, self.parse.list_connections, self.parse.nb_drones)
+        plans = planner.plan_all()
+        total_turns = max((len(p) for p in plans), default=0)
 
-        list_drones: list[Drone] = []
+        list_drones: list[Drone] = [
+            Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
+            for _ in range(self.parse.nb_drones)
+        ]
 
-        for i in range(self.parse.nb_drones):
-            new_drone = Drone(start_box_x, start_box_y, "./images/drone_50x50.png")
+        current_turn = 0
+        finished = False
+        dt = 0.0
+        restart = False
 
-            list_drones.append(new_drone)
+        restart_option_label = "<R> to restart"
 
         while running:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
 
-                if event.type == pg.KEYDOWN:
-                    if event.key == 1073741910:
-                        if self.cell_size <= 30:
-                            break
-                        self.cell_size -= 5
-                        for i, zone in enumerate(self.parse.list_zones):
-                            boxes[i].w = self.cell_size // 2
-                            boxes[i].h = self.cell_size // 2
+                elif event.type == pg.KEYDOWN:
+                    if event.key in (pg.K_KP_MINUS, pg.K_MINUS):
+                        self._zoom(-ZOOM_STEP)
+                    elif event.key in (pg.K_KP_PLUS, pg.K_PLUS, pg.K_EQUALS):
+                        self._zoom(ZOOM_STEP)
 
-                            boxes[i].x = zone.x * self.cell_size + offset_x
-
-                            boxes[i].y = zone.y * self.cell_size + offset_y
-
-                    if event.key == 1073741911:
-                        if self.cell_size >= 200:
-                            break
-                        self.cell_size += 5
-                        for i, zone in enumerate(self.parse.list_zones):
-                            boxes[i].w = self.cell_size // 2
-                            boxes[i].h = self.cell_size // 2
-
-                            boxes[i].x = zone.x * self.cell_size + offset_x
-
-                            boxes[i].y = zone.y * self.cell_size + offset_y
+                    elif event.key == pg.K_r:
+                        restart = True
 
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
                         dragging = True
-
                     elif event.button == 4:
-                        if self.cell_size >= 200:
-                            break
-                        self.cell_size += 5
-                        for i, zone in enumerate(self.parse.list_zones):
-                            boxes[i].w = self.cell_size // 2
-                            boxes[i].h = self.cell_size // 2
-
-                            boxes[i].x = zone.x * self.cell_size + offset_x
-
-                            boxes[i].y = zone.y * self.cell_size + offset_y
-
+                        self._zoom(ZOOM_STEP)
                     elif event.button == 5:
-                        if self.cell_size <= 30:
-                            break
-                        self.cell_size -= 5
-                        self.font.size("24")
-                        for i, zone in enumerate(self.parse.list_zones):
-                            boxes[i].w = self.cell_size // 2
-                            boxes[i].h = self.cell_size // 2
+                        self._zoom(-ZOOM_STEP)
 
-                            boxes[i].x = zone.x * self.cell_size + offset_x
+                elif event.type == pg.MOUSEMOTION and dragging:
+                    dx, dy = event.rel
+                    self.offset_x += dx
+                    self.offset_y += dy
+                    self._update_boxes()
 
-                            boxes[i].y = zone.y * self.cell_size + offset_y
-
-                elif event.type == pg.MOUSEMOTION:
-                    if dragging:
-                        for box in boxes:
-                            dx, dy = event.rel
-                            box.move_ip((dx, dy))
-
-                        offset_x += dx
-                        offset_y += dy
-
-                elif event.type == pg.MOUSEBUTTONUP:
-                    if event.button == 1:
-                        dragging = False
+                elif event.type == pg.MOUSEBUTTONUP and event.button == 1:
+                    dragging = False
 
             self.screen.fill((0, 0, 0))
 
-            for i, box in enumerate(boxes):
-                pg.draw.rect(self.screen, color_rgb[color[i].upper()], box)
-
-                text = self.font.render(
-                    self.parse.list_zones[i].name, True, color_rgb["WHITE"]
+            if finished and restart:
+                list_drones: list[Drone] = [
+                    Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
+                    for _ in range(self.parse.nb_drones)
+                ]
+                finished = False
+                planner = Planner(
+                    zones, self.parse.list_connections, self.parse.nb_drones
                 )
-
-                text_rect = text.get_rect()
-                text_rect.midtop = (box.centerx, box.bottom + 5)
-
-                self.screen.blit(text, text_rect)        
+                plans = planner.plan_all()
+                total_turns = max((len(p) for p in plans), default=0)
+                current_turn = 0
+                dt = 0.0
 
             for conn in self.parse.list_connections:
-                zone1_pos = (0, 0)
-                zone2_pos = (0, 0)
+                pos1 = self.boxes[zone_index[conn.zone1.name]].center
+                pos2 = self.boxes[zone_index[conn.zone2.name]].center
+                pg.draw.line(self.screen, color_rgb["WHITE"], pos1, pos2, 2)
 
-                for zone in self.parse.list_zones:
-                    if conn.zone1.name == zone.name:
-                        index = self.parse.list_zones.index(zone)
-                        zone1_pos = boxes[index].center
+            show_names = self.cell_size > MIN_CELL
+            zone_font = pg.font.Font(None, 24) if show_names else None
+            margin = max(2, self.cell_size // 12)
 
-                    if conn.zone2.name == zone.name:
-                        index = self.parse.list_zones.index(zone)
-                        zone2_pos = boxes[index].center
+            for i, box in enumerate(self.boxes):
+                pg.draw.rect(self.screen, color_rgb[colors[i].upper()], box)
 
-                pg.draw.line(self.screen, color_rgb["WHITE"], zone1_pos, zone2_pos, 2)
+                if zone_font is not None:
+                    text = zone_font.render(zones[i].name, True, color_rgb["WHITE"])
+                    text_rect = text.get_rect()
+                    text_rect.midtop = (box.centerx, box.bottom + margin)
+                    self.screen.blit(text, text_rect)
 
-                if conn.zone1.is_start:
-                    pg.draw.circle(self.screen, color_rgb["MAROON"], zone1_pos, 10)
-                
+            if not finished and not any(d.moving for d in list_drones):
+                current_turn += 1
+                if current_turn > total_turns:
+                    finished = True
+                    restart = False
+                    current_turn -= 1
+                else:
+                    for drone, plan in zip(list_drones, plans):
+                        if current_turn <= len(plan):
+                            action = plan[current_turn - 1]
+                            if action is not None:
+                                drone.target = action
+                                drone.moving = True
 
-            #######################################################
+            for i, drone in enumerate(list_drones):
+                if drone.moving and drone.target is not None:
+                    if drone.move_to(drone.target[0], drone.target[1], dt):
+                        drone.turn += 1
+                        drone.moving = False
 
-            #######################################################
+                drone.draw(self.screen, self.cell_size, self.offset_x, self.offset_y)
+
+                sx, sy = drone.screen_pos(self.cell_size, self.offset_x, self.offset_y)
+                label = self.font.render(
+                    f"D{i + 1}: {drone.turn}", True, color_rgb["WHITE"]
+                )
+                label_rect = label.get_rect()
+                label_rect.midbottom = (sx, sy - self.cell_size // 4)
+                self.screen.blit(label, label_rect)
+
+            turn_text = self.font.render(
+                f"Tour : {current_turn}" + (" (terminé)" if finished else ""),
+                True,
+                color_rgb["WHITE"],
+            )
+            self.screen.blit(turn_text, (10, 10))
+
+            turn_text = self.font.render(
+                restart_option_label,
+                True,
+                color_rgb["WHITE"],
+            )
+            self.screen.blit(
+                turn_text, (self.width - (100 + len(restart_option_label)), 10)
+            )
 
             pg.display.flip()
+            dt = self.clock.tick(FPS) / 1000
+
+        pg.quit()
