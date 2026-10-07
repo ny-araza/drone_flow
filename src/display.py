@@ -70,7 +70,6 @@ class Display:
         import math
 
         rad = math.radians(angle)
-        print(rad)
         x = center[0] + int(math.cos(rad) * radius)
         y = center[1] + int(math.sin(rad) * radius)
 
@@ -78,11 +77,29 @@ class Display:
 
         font = pg.font.Font(None, 36)
 
-        text = font.render("Calculate the path for all drones...", True, color_rgb["GREEN"])
+        text = font.render(
+            "Calculate the path for all drones...", True, color_rgb["GREEN"]
+        )
 
         text_rect = text.get_rect(center=(center[0], center[1] + 80))
 
         self.screen.blit(text, text_rect)
+
+    def _average_turn(self, list_drones: list[Drone]) -> int:
+        total_turn = 0
+
+        for drone in list_drones:
+            total_turn += drone.turn
+
+        return total_turn // len(list_drones)
+
+    def draw_text(self, text: str, color: str, x: int, y: int) -> None:
+        text_drawed = self.font.render(
+            text,
+            True,
+            color_rgb[color.upper()],
+        )
+        self.screen.blit(text_drawed, (x, y))
 
     def display_window(self) -> None:
         running = True
@@ -118,19 +135,16 @@ class Display:
 
             def calculate():
                 nonlocal plans, loading, planner
-                print("thread: début", flush=True)
                 planner = Planner(
                     zones,
                     self.parse.list_connections,
                     self.parse.nb_drones,
                 )
                 result = planner.plan_all()
-                print("thread: fini", flush=True)
                 plans = result
                 loading = False
 
             threading.Thread(target=calculate, daemon=True).start()
-
 
         list_drones: list[Drone] = [
             Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
@@ -145,6 +159,8 @@ class Display:
         pause = False
         angle = 0
         restart_option_label = "<R> to restart"
+
+        text_margin = 10
 
         start_planning()
 
@@ -184,7 +200,6 @@ class Display:
                     dragging = False
 
             self.screen.fill((0, 0, 0))
-            print(loading)
             if loading:
                 self.draw_loading(angle)
 
@@ -256,20 +271,33 @@ class Display:
                 label_rect = label.get_rect()
                 label_rect.midbottom = (sx, sy - self.cell_size // 4)
                 self.screen.blit(label, label_rect)
-            turn_text = self.font.render(
-                f"Tour : {current_turn}" + (" (terminé)" if finished else ""),
-                True,
-                color_rgb["WHITE"],
-            )
-            self.screen.blit(turn_text, (10, 10))
 
-            turn_text = self.font.render(
-                restart_option_label,
-                True,
-                color_rgb["WHITE"],
+            self.draw_text(
+                f"Tour : {current_turn}" + (" (terminé)" if finished else ""),
+                "white",
+                10,
+                10,
             )
-            self.screen.blit(
-                turn_text, (self.width - (100 + len(restart_option_label)), 10)
+
+            self.draw_text(
+                f"Average turn for each drone: {self._average_turn(list_drones)}",
+                "green",
+                10,
+                text_margin + MAX_ZONE_FONT,
+            )
+
+            self.draw_text(
+                f"Total path cost: {total_turns * len(list_drones)}",
+                "green",
+                10,
+                text_margin + (MAX_ZONE_FONT * 2),
+            )
+
+            self.draw_text(
+                restart_option_label,
+                "white",
+                (self.width - (100 + len(restart_option_label))),
+                10,
             )
 
             pg.display.flip()
