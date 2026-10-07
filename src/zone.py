@@ -1,15 +1,17 @@
 from enum import Enum
 
+
 class TypeZone(Enum):
     NORMAL = "normal"
     BLOCKED = "blocked"
     RESTRICTED = "restricted"
     PRIORITY = "priority"
 
+
 class ColorType(Enum):
     RED = "red"
     BLUE = "blue"
-    GREEN = "green" 
+    GREEN = "green"
     YELLOW = "yellow"
     WHITE = "white"
     PURPLE = "purple"
@@ -27,11 +29,12 @@ class ColorType(Enum):
     RAINBOW = "rainbow"
     GRAY = "gray"
 
+
 class Zone:
     def __init__(
-            self, name: str, 
+            self, name: str,
             x: int, y: int,
-            is_start: bool = False, 
+            is_start: bool = False,
             is_end: bool = False,
             type: TypeZone = TypeZone.NORMAL,
             max_drones: int = 1,

@@ -1,7 +1,5 @@
 from typing import Any
 
-from typing import Any
-
 color_rgb: dict[str, Any] = {
     "RED":       (255, 0, 0),
     "BLUE":      (0, 0, 255),

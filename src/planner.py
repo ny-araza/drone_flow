@@ -1,18 +1,11 @@
 import heapq
 from typing import Any
 
-import pygame as pg
-from colorama import Fore, Style
-from pydantic_core.core_schema import tuple_positional_schema
-from pygame.font import Font
-from pygame.surface import Surface
 
-from src.error import ParseError
 from src.zone import Zone
 
 from .color import color_rgb
 from .utils import Utils
-from .zone import TypeZone
 
 INF = float("inf")
 
@@ -32,7 +25,7 @@ class Planner:
         self.nb_drones = nb_drones
         self.horizon = 4 * (len(zones) + nb_drones)
         self.loading = True
-        self.adj: dict[str, list[tuple[Zone, frozenset, int, int]]] = {
+        self.adj: dict[str, list[tuple[Zone, frozenset[str], int, int]]] = {
             z.name: [] for z in zones
         }
         for conn in connections:
@@ -47,7 +40,7 @@ class Planner:
                 self.adj[src.name].append((dst, key, cap, cost))
 
         self.zone_use: dict[tuple[str, int], int] = {}
-        self.link_use: dict[tuple[frozenset, int], int] = {}
+        self.link_use: dict[tuple[frozenset[str], int], int] = {}
         self.timeline: dict[int, list[tuple[str, str]]]
 
     def get_loading(self) -> bool:
@@ -92,8 +85,9 @@ class Planner:
                 if current_zone == next_zone:
                     continue
 
-                if next_zone == self.end.name:
-                    goal_cpt += 1
+                if self.end:
+                    if next_zone == self.end.name:
+                        goal_cpt += 1
 
                 if next_turn - current_turn != 1:
                     Utils.print_rgb(
@@ -142,7 +136,8 @@ class Planner:
 
             zone = self.zones[name]
 
-            if self.zone_use.get((name, t + 1), 0) < float(self._capacity(zone)):
+            if self.zone_use.get((name, t + 1), 0) < \
+                    float(self._capacity(zone)):
                 self._push(state, (name, t + 1), pen, dist, parent, heap)
 
             for dst, key, link_cap, cost in self.adj[name]:
@@ -158,12 +153,21 @@ class Planner:
                 ):
                     continue
                 new_pen = pen + (0 if self._type(dst) == "priority" else 1)
-                self._push(state, (dst.name, arrive), new_pen, dist, parent, heap)
+                self._push(
+                    state, (dst.name, arrive),
+                    new_pen, dist, parent, heap
+                )
             i += 1
         return None
 
     @staticmethod
-    def _push(cur, nxt, pen, dist, parent, heap) -> None:
+    def _push(
+                cur: tuple[str, int],
+                nxt: tuple[str, int],
+                pen: int, dist: dict[tuple[str, int], int],
+                parent: dict[tuple[str, int], tuple[str, int] | None],
+                heap: list[tuple[int, int, str]]
+            ) -> None:
         if pen < dist.get(nxt, INF):
             dist[nxt] = pen
             parent[nxt] = cur
@@ -179,7 +183,8 @@ class Planner:
                 continue
             key = frozenset((a, b))
             for k in range(1, tb - ta + 1):
-                self.link_use[(key, ta + k)] = self.link_use.get((key, ta + k), 0) + 1
+                self.link_use[(key, ta + k)] = self.link_use.get(
+                    (key, ta + k), 0) + 1
 
     def _to_actions(self, path: list[tuple[str, int]]) -> list[Action]:
         actions: list[Action] = []

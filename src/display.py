@@ -1,8 +1,6 @@
-import faulthandler
 import threading
 
 import pygame as pg
-from pygame.image import load
 
 from src.drones import Drone
 from src.planner import Action, Planner
@@ -35,7 +33,7 @@ class Display:
         self.width = width
         self.height = height
         self.cell_size = cell_size
-        self.list_rect = []
+        self.list_rect: list[pg.Rect] = []
         self.boxes: list[pg.Rect] = []
         self.offset_x = 0
         self.offset_y = 0
@@ -128,12 +126,13 @@ class Display:
         loading = True
         planner = Planner([], [], 0)
 
-        def start_planning():
+        def start_planning() -> None:
             nonlocal plans, loading, planner
             plans = []
             loading = True
+            planner = Planner([], [], 0)
 
-            def calculate():
+            def calculate() -> None:
                 nonlocal plans, loading, planner
                 planner = Planner(
                     zones,
@@ -164,7 +163,6 @@ class Display:
         stats_option_label = "<D> to hide/show informations"
 
         text_margin = 10
-        
         display_stats = True
         display_name = False
 
@@ -210,7 +208,7 @@ class Display:
                 elif event.type == pg.MOUSEBUTTONUP and event.button == 1:
                     dragging = False
 
-            self.screen.fill((0, 0, 0))
+            self.screen.fill((21, 0, 79))
             if loading:
                 self.draw_loading(angle)
 
@@ -228,7 +226,10 @@ class Display:
 
             if finished and restart:
                 list_drones = [
-                    Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
+                    Drone(
+                        start_zone.x, start_zone.y,
+                        "./images/drone_50x50.png"
+                    )
                     for _ in range(self.parse.nb_drones)
                 ]
                 finished = False
@@ -245,10 +246,16 @@ class Display:
             margin = max(2, self.cell_size // 12)
 
             for i, box in enumerate(self.boxes):
-                pg.draw.rect(self.screen, color_rgb[colors[i].upper()], box)
+                pg.draw.rect(
+                    self.screen,
+                    color_rgb[str(colors[i]).upper()], box
+                )
 
                 if zone_font is not None:
-                    text = zone_font.render(zones[i].name, True, color_rgb["WHITE"])
+                    text = zone_font.render(
+                        zones[i].name,
+                        True, color_rgb["WHITE"]
+                    )
                     text_rect = text.get_rect()
                     text_rect.midtop = (box.centerx, box.bottom + margin)
                     self.screen.blit(text, text_rect)
@@ -273,9 +280,15 @@ class Display:
                         drone.turn += 1
                         drone.moving = False
 
-                drone.draw(self.screen, self.cell_size, self.offset_x, self.offset_y)
+                drone.draw(
+                    self.screen, self.cell_size,
+                    self.offset_x, self.offset_y
+                )
 
-                sx, sy = drone.screen_pos(self.cell_size, self.offset_x, self.offset_y)
+                sx, sy = drone.screen_pos(
+                    self.cell_size, self.offset_x,
+                    self.offset_y
+                )
                 label = self.font.render(
                     f"D{i + 1}: {drone.turn}", True, color_rgb["WHITE"]
                 )
@@ -285,33 +298,31 @@ class Display:
 
             if display_stats:
                 self.draw_text(
-                    f"Tour : {current_turn}" + (" (terminé)" if finished else ""),
+                    f"Tour : {current_turn}"
+                    + (" (terminé)" if finished else ""),
                     "green",
                     10,
                     10,
                 )
-    
                 self.draw_text(
-                    f"Average turn for each drone: {self._average_turn(list_drones)}",
+                    "Average turn for each drone: "
+                    f"{self._average_turn(list_drones)}",
                     "green",
                     10,
                     text_margin + MAX_ZONE_FONT,
                 )
-    
                 self.draw_text(
                     f"Total path cost: {total_turns * len(list_drones)}",
                     "green",
                     10,
                     text_margin + (MAX_ZONE_FONT * 2),
                 )
-    
                 self.draw_text(
                     restart_option_label,
                     "white",
                     (self.width - 240),
                     10,
                 )
-    
                 self.draw_text(
                     zone_name_option_label,
                     "white",

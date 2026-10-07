@@ -1,8 +1,8 @@
 from pydantic import BaseModel, Field, \
-        model_validator, ValidationError
-from .zone import TypeZone, ColorType, Zone
+        model_validator
+from .zone import TypeZone, ColorType
 from typing_extensions import Self
-from typing import Any
+
 
 class ZoneValidation(BaseModel):
     name: str = Field(...)
@@ -20,7 +20,6 @@ class ZoneValidation(BaseModel):
         for char in forbidden_charactere:
             if char in self.name:
                 raise ValueError(
-                    f"Zone name shouldn't contain '-\\n\\t\\a\\b\\v\\f\\r'"
+                    "Zone name shouldn't contain '-\\n\\t\\a\\b\\v\\f\\r'"
                 )
         return self
-

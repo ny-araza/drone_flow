@@ -8,7 +8,7 @@ class Drone:
         self.y = y
 
         self.turn = 0
-        
+
         self.image = pg.image.load(image).convert_alpha()
         self.rect = self.image.get_rect()
 
@@ -59,9 +59,15 @@ class Drone:
         size = max(10, int(cell_size * 0.5))
 
         if self._scaled_image is None or size != self._scaled_size:
-            self._scaled_image = pg.transform.smoothscale(self.image, (size, size))
+            self._scaled_image = pg.transform.smoothscale(
+                self.image, (size, size)
+            )
             self._scaled_size = size
 
-        rect = self._scaled_image.get_rect(center=(int(screen_x), int(screen_y)))
+        rect = self._scaled_image.get_rect(
+            center=(
+                int(screen_x), int(screen_y)
+            )
+        )
 
         screen.blit(self._scaled_image, rect)

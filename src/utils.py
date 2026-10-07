@@ -1,6 +1,3 @@
-from .zone import Zone
-
-
 class Utils:
     @staticmethod
     def read_file(file_path: str) -> str:
@@ -10,17 +7,6 @@ class Utils:
         return data
 
     @staticmethod
-    def display_zone(zones: list[Zone]) -> None:
-        for index, zone in enumerate(zones):
-            print(f"\n {index}")
-            print(f"name: {zone.name}")
-            print(f"type: {zone.type}")
-            print(f"color: {zone.color}")
-            print(f"is_start: {zone.is_start}")
-            print(f"is_end: {zone.is_end}")
-            print(f"max_drones: {zone.max_drones}")
-
-    @staticmethod
-    def print_rgb(text, rgb: tuple[int, int, int]) -> None:
+    def print_rgb(text: str, rgb: tuple[int, int, int]) -> None:
         r, g, b = rgb
         print(f"\033[38;2;{r};{g};{b}m{text}\033[0m", end=" ")
