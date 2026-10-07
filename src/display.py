@@ -1,3 +1,4 @@
+import faulthandler
 import threading
 
 import pygame as pg
@@ -64,23 +65,20 @@ class Display:
 
         radius = 40
 
-        # Cercle extérieur
         pg.draw.circle(self.screen, (80, 80, 80), center, radius, 5)
 
-        # Point qui tourne
         import math
 
         rad = math.radians(angle)
-
+        print(rad)
         x = center[0] + int(math.cos(rad) * radius)
         y = center[1] + int(math.sin(rad) * radius)
 
-        pg.draw.circle(self.screen, (0, 200, 255), (x, y), 8)
+        pg.draw.circle(self.screen, color_rgb["BLUE"], (x, y), 8)
 
-        # Texte
         font = pg.font.Font(None, 36)
 
-        text = font.render("Calcul du plan...", True, (255, 255, 255))
+        text = font.render("Calculate the path for all drones...", True, color_rgb["GREEN"])
 
         text_rect = text.get_rect(center=(center[0], center[1] + 80))
 
@@ -111,26 +109,28 @@ class Display:
 
         plans: list[list[Action]] = []
         loading = True
+        planner = Planner([], [], 0)
 
         def start_planning():
-            nonlocal plans, loading
+            nonlocal plans, loading, planner
             plans = []
             loading = True
 
             def calculate():
-                nonlocal plans, loading
-                local_planner = Planner(
+                nonlocal plans, loading, planner
+                print("thread: début", flush=True)
+                planner = Planner(
                     zones,
                     self.parse.list_connections,
                     self.parse.nb_drones,
                 )
-                result = local_planner.plan_all()
+                result = planner.plan_all()
+                print("thread: fini", flush=True)
                 plans = result
                 loading = False
 
             threading.Thread(target=calculate, daemon=True).start()
 
-        start_planning()
 
         list_drones: list[Drone] = [
             Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
@@ -144,10 +144,12 @@ class Display:
         restart = False
         pause = False
         angle = 0
-
         restart_option_label = "<R> to restart"
 
+        start_planning()
+
         while running:
+            print(loading)
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
@@ -182,9 +184,8 @@ class Display:
                     dragging = False
 
             self.screen.fill((0, 0, 0))
-
+            print(loading)
             if loading:
-                print(loading)
                 self.draw_loading(angle)
 
                 angle = (angle + 5) % 360
@@ -207,8 +208,6 @@ class Display:
                 finished = False
                 current_turn = 0
                 dt = 0.0
-
-                start_planning()
 
             for conn in self.parse.list_connections:
                 pos1 = self.boxes[zone_index[conn.zone1.name]].center
