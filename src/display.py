@@ -158,9 +158,15 @@ class Display:
         restart = False
         pause = False
         angle = 0
+
         restart_option_label = "<R> to restart"
+        zone_name_option_label = "<P> to display/not zone name"
+        stats_option_label = "<D> to hide/show informations"
 
         text_margin = 10
+        
+        display_stats = True
+        display_name = False
 
         start_planning()
 
@@ -181,6 +187,12 @@ class Display:
 
                     elif event.key == pg.K_SPACE:
                         pause = not pause
+
+                    elif event.key == pg.K_p:
+                        display_name = not display_name
+
+                    elif event.key == pg.K_d:
+                        display_stats = not display_stats
 
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -229,7 +241,7 @@ class Display:
                 pos2 = self.boxes[zone_index[conn.zone2.name]].center
                 pg.draw.line(self.screen, color_rgb["WHITE"], pos1, pos2, 2)
 
-            show_names = self.cell_size > MIN_CELL
+            show_names = display_name
             zone_font = pg.font.Font(None, 24) if show_names else None
             margin = max(2, self.cell_size // 12)
 
@@ -272,33 +284,48 @@ class Display:
                 label_rect.midbottom = (sx, sy - self.cell_size // 4)
                 self.screen.blit(label, label_rect)
 
-            self.draw_text(
-                f"Tour : {current_turn}" + (" (terminé)" if finished else ""),
-                "white",
-                10,
-                10,
-            )
+            if display_stats:
+                self.draw_text(
+                    f"Tour : {current_turn}" + (" (terminé)" if finished else ""),
+                    "green",
+                    10,
+                    10,
+                )
+    
+                self.draw_text(
+                    f"Average turn for each drone: {self._average_turn(list_drones)}",
+                    "green",
+                    10,
+                    text_margin + MAX_ZONE_FONT,
+                )
+    
+                self.draw_text(
+                    f"Total path cost: {total_turns * len(list_drones)}",
+                    "green",
+                    10,
+                    text_margin + (MAX_ZONE_FONT * 2),
+                )
+    
+                self.draw_text(
+                    restart_option_label,
+                    "white",
+                    (self.width - 240),
+                    10,
+                )
+    
+                self.draw_text(
+                    zone_name_option_label,
+                    "white",
+                    (self.width - 240),
+                    text_margin + (MAX_ZONE_FONT),
+                )
 
-            self.draw_text(
-                f"Average turn for each drone: {self._average_turn(list_drones)}",
-                "green",
-                10,
-                text_margin + MAX_ZONE_FONT,
-            )
-
-            self.draw_text(
-                f"Total path cost: {total_turns * len(list_drones)}",
-                "green",
-                10,
-                text_margin + (MAX_ZONE_FONT * 2),
-            )
-
-            self.draw_text(
-                restart_option_label,
-                "white",
-                (self.width - (100 + len(restart_option_label))),
-                10,
-            )
+                self.draw_text(
+                    stats_option_label,
+                    "white",
+                    (self.width - 240),
+                    text_margin + (MAX_ZONE_FONT * 2),
+                )
 
             pg.display.flip()
             dt = self.clock.tick(FPS) / 1000
