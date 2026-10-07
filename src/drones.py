@@ -7,26 +7,20 @@ class Drone:
         self.x = x
         self.y = y
 
-        # Nombre de tours pendant lesquels le drone s'est déplacé
         self.turn = 0
-        self.checkpoint = False
-
+        
         self.image = pg.image.load(image).convert_alpha()
         self.rect = self.image.get_rect()
 
-        # Vitesse en zones (unités de grille) par seconde
         self.speed = 3.0
 
-        # Cible du tour en cours ; moving=True pendant le déplacement
         self.target: tuple[float, float] | None = None
         self.moving = False
 
-        # Cache de l'image redimensionnée
         self._scaled_image: pg.Surface | None = None
         self._scaled_size = 0
 
     def move_to(self, target_x: float, target_y: float, dt: float) -> bool:
-        """Avance vers la cible. dt en secondes. True quand arrivé."""
 
         dx = target_x - self.x
         dy = target_y - self.y
@@ -47,8 +41,6 @@ class Drone:
     def screen_pos(
         self, cell_size: int, offset_x: int, offset_y: int
     ) -> tuple[int, int]:
-        """Conversion coordonnées carte -> écran (centre de la zone,
-        même formule que les boxes dans Display)."""
         return (
             int(self.x * cell_size + cell_size // 2 + offset_x),
             int(self.y * cell_size + cell_size // 2 + offset_y),
@@ -64,7 +56,6 @@ class Drone:
 
         screen_x, screen_y = self.screen_pos(cell_size, offset_x, offset_y)
 
-        # Taille proportionnelle au zoom
         size = max(10, int(cell_size * 0.5))
 
         if self._scaled_image is None or size != self._scaled_size:

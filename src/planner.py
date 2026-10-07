@@ -1,20 +1,22 @@
-from __future__ import annotations
-
 import heapq
-from sys import intern
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-if TYPE_CHECKING:
-    from src.zone import Zone
+import pygame as pg
+from pygame.font import Font
+from pygame.surface import Surface
+
+from .color import color_rgb
+from src.error import ParseError
+from src.zone import Zone
+
+from .zone import TypeZone
 
 INF = float("inf")
 
-# Une action = position cible (x, y) pour un tour, ou None si le drone attend
 Action = tuple[float, float] | None
 
 
 class Planner:
-
     def __init__(
         self,
         zones: list[Zone],
@@ -25,9 +27,8 @@ class Planner:
         self.start = next((z for z in zones if z.is_start), None)
         self.end = next((z for z in zones if z.is_end), None)
         self.nb_drones = nb_drones
-        self.horizon = 4 * (len(zones) + nb_drones) + 10
-
-        # adj[nom] = [(zone_voisine, clé_connexion, capacité_connexion, coût)]
+        self.horizon = 4 * (len(zones) + nb_drones)
+        self.loading = True
         self.adj: dict[str, list[tuple[Zone, frozenset, int, int]]] = {
             z.name: [] for z in zones
         }
@@ -42,14 +43,18 @@ class Planner:
                 cost = 2 if kind == "restricted" else 1
                 self.adj[src.name].append((dst, key, cap, cost))
 
-        # Réservations : (nom_zone, t) -> nb drones, (clé_connexion, t) -> nb
         self.zone_use: dict[tuple[str, int], int] = {}
         self.link_use: dict[tuple[frozenset, int], int] = {}
 
-    # ------------------------------------------------------------------
+    def get_loading(self) -> bool:
+        return self.loading
+
+    def set_loading(self, loading: bool) -> None:
+        self.loading = loading
+
     @staticmethod
     def _type(zone: Zone) -> str:
-        return str(getattr(zone.type, "value", zone.type)).lower()
+        return str(getattr(zone, "type", zone)).lower()
 
     @staticmethod
     def _capacity(zone: Zone) -> float:
@@ -57,17 +62,19 @@ class Planner:
             return INF
         return zone.max_drones
 
-    # ------------------------------------------------------------------
     def plan_all(self) -> list[list[Action]]:
         plans: list[list[Action]] = []
         for i in range(self.nb_drones):
             path = self._find_path()
             if path is None:
-                print(f"Aucun chemin valide pour le drone {i + 1}")
+                print(f"No path found for drone {i + 1}")
                 plans.append([])
                 continue
             self._reserve(path)
+            
             plans.append(self._to_actions(path))
+
+        self.loading = False
         return plans
 
     def _find_path(self) -> list[tuple[str, int]] | None:
@@ -79,7 +86,7 @@ class Planner:
         parent: dict[tuple[str, int], tuple[str, int] | None] = {first: None}
         heap: list[tuple[int, int, str]] = [(0, 0, self.start.name)]
         done: set[tuple[str, int]] = set()
-
+        i = 0
         while heap:
             t, pen, name = heapq.heappop(heap)
             state = (name, t)
@@ -101,11 +108,9 @@ class Planner:
 
             zone = self.zones[name]
 
-            # Attendre sur place
             if self.zone_use.get((name, t + 1), 0) < float(self._capacity(zone)):
                 self._push(state, (name, t + 1), pen, dist, parent, heap)
 
-            # Se déplacer
             for dst, key, link_cap, cost in self.adj[name]:
                 arrive = t + cost
                 if any(
@@ -113,11 +118,14 @@ class Planner:
                     for k in range(1, cost + 1)
                 ):
                     continue
-                if self.zone_use.get((dst.name, arrive), 0) >= float(self._capacity(dst)):
+
+                if self.zone_use.get((dst.name, arrive), 0) >= float(
+                    self._capacity(dst)
+                ):
                     continue
                 new_pen = pen + (0 if self._type(dst) == "priority" else 1)
                 self._push(state, (dst.name, arrive), new_pen, dist, parent, heap)
-
+            i += 1
         return None
 
     @staticmethod
@@ -128,12 +136,10 @@ class Planner:
             heapq.heappush(heap, (nxt[1], pen, nxt[0]))
 
     def _reserve(self, path: list[tuple[str, int]]) -> None:
-        # Zones occupées à chaque instant entier
         for name, t in path:
             if self._capacity(self.zones[name]) != INF:
                 self.zone_use[(name, t)] = self.zone_use.get((name, t), 0) + 1
 
-        # Connexions utilisées pendant chaque tour de déplacement
         for (a, ta), (b, tb) in zip(path, path[1:]):
             if a == b:
                 continue
@@ -151,7 +157,6 @@ class Planner:
             if tb - ta == 1:
                 actions.append((float(zb.x), float(zb.y)))
             else:
-                # Zone restreinte : mi-chemin au 1er tour, arrivée au 2e
                 actions.append(((za.x + zb.x) / 2, (za.y + zb.y) / 2))
                 actions.append((float(zb.x), float(zb.y)))
         return actions

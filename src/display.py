@@ -1,14 +1,17 @@
+import threading
+
 import pygame as pg
+from pygame.image import load
 
 from src.drones import Drone
-from src.planner import Planner
+from src.planner import Action, Planner
 from src.zone import Zone
 
 from .color import color_rgb
 from .parse import Parse
 from .utils import Utils
 
-MIN_CELL = 30
+MIN_CELL = 50
 MAX_CELL = 200
 ZOOM_STEP = 5
 FPS = 60
@@ -41,8 +44,6 @@ class Display:
         self.font = pg.font.Font(None, 24)
 
     def _update_boxes(self) -> None:
-        """Recalcule taille et position de chaque box (même formule que
-        l'initialisation : centre = coord * cell_size + cell_size // 2)."""
         half = self.cell_size // 2
         for box, zone in zip(self.boxes, self.parse.list_zones):
             box.size = (half, half)
@@ -57,6 +58,33 @@ class Display:
             return
         self.cell_size = new_size
         self._update_boxes()
+
+    def draw_loading(self, angle: int) -> None:
+        center = (self.screen.get_width() // 2, self.screen.get_height() // 2)
+
+        radius = 40
+
+        # Cercle extérieur
+        pg.draw.circle(self.screen, (80, 80, 80), center, radius, 5)
+
+        # Point qui tourne
+        import math
+
+        rad = math.radians(angle)
+
+        x = center[0] + int(math.cos(rad) * radius)
+        y = center[1] + int(math.sin(rad) * radius)
+
+        pg.draw.circle(self.screen, (0, 200, 255), (x, y), 8)
+
+        # Texte
+        font = pg.font.Font(None, 36)
+
+        text = font.render("Calcul du plan...", True, (255, 255, 255))
+
+        text_rect = text.get_rect(center=(center[0], center[1] + 80))
+
+        self.screen.blit(text, text_rect)
 
     def display_window(self) -> None:
         running = True
@@ -81,19 +109,41 @@ class Display:
 
         self._update_boxes()
 
-        planner = Planner(zones, self.parse.list_connections, self.parse.nb_drones)
-        plans = planner.plan_all()
-        total_turns = max((len(p) for p in plans), default=0)
+        plans: list[list[Action]] = []
+        loading = True
+
+        def start_planning():
+            nonlocal plans, loading
+            plans = []
+            loading = True
+
+            def calculate():
+                nonlocal plans, loading
+                local_planner = Planner(
+                    zones,
+                    self.parse.list_connections,
+                    self.parse.nb_drones,
+                )
+                result = local_planner.plan_all()
+                plans = result
+                loading = False
+
+            threading.Thread(target=calculate, daemon=True).start()
+
+        start_planning()
 
         list_drones: list[Drone] = [
             Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
             for _ in range(self.parse.nb_drones)
         ]
 
+        total_turns = 0
         current_turn = 0
         finished = False
         dt = 0.0
         restart = False
+        pause = False
+        angle = 0
 
         restart_option_label = "<R> to restart"
 
@@ -105,11 +155,14 @@ class Display:
                 elif event.type == pg.KEYDOWN:
                     if event.key in (pg.K_KP_MINUS, pg.K_MINUS):
                         self._zoom(-ZOOM_STEP)
-                    elif event.key in (pg.K_KP_PLUS, pg.K_PLUS, pg.K_EQUALS):
+                    elif event.key in (pg.K_KP_PLUS, pg.K_PLUS):
                         self._zoom(ZOOM_STEP)
 
                     elif event.key == pg.K_r:
                         restart = True
+
+                    elif event.key == pg.K_SPACE:
+                        pause = not pause
 
                 elif event.type == pg.MOUSEBUTTONDOWN:
                     if event.button == 1:
@@ -130,19 +183,32 @@ class Display:
 
             self.screen.fill((0, 0, 0))
 
+            if loading:
+                print(loading)
+                self.draw_loading(angle)
+
+                angle = (angle + 5) % 360
+
+                pg.display.flip()
+                dt = self.clock.tick(FPS) / 1000
+
+                continue
+
+            total_turns = max(
+                (len(p) for p in plans),
+                default=0,
+            )
+
             if finished and restart:
-                list_drones: list[Drone] = [
+                list_drones = [
                     Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
                     for _ in range(self.parse.nb_drones)
                 ]
                 finished = False
-                planner = Planner(
-                    zones, self.parse.list_connections, self.parse.nb_drones
-                )
-                plans = planner.plan_all()
-                total_turns = max((len(p) for p in plans), default=0)
                 current_turn = 0
                 dt = 0.0
+
+                start_planning()
 
             for conn in self.parse.list_connections:
                 pos1 = self.boxes[zone_index[conn.zone1.name]].center
@@ -191,7 +257,6 @@ class Display:
                 label_rect = label.get_rect()
                 label_rect.midbottom = (sx, sy - self.cell_size // 4)
                 self.screen.blit(label, label_rect)
-
             turn_text = self.font.render(
                 f"Tour : {current_turn}" + (" (terminé)" if finished else ""),
                 True,
@@ -210,5 +275,4 @@ class Display:
 
             pg.display.flip()
             dt = self.clock.tick(FPS) / 1000
-
         pg.quit()
