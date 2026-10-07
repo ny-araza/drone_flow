@@ -83,12 +83,27 @@ class Planner:
         goal_cpt = 0
         while goal_cpt != self.nb_drones:
             for y in range(len(paths)):
-                if cpt < len(paths[y]):
-                    if paths[y][cpt][0] == self.end.name:
-                        goal_cpt += 1
+                if cpt + 1 >= len(paths[y]):
+                    continue
+
+                current_zone, current_turn = paths[y][cpt]
+                next_zone, next_turn = paths[y][cpt + 1]
+
+                if current_zone == next_zone:
+                    continue
+
+                if next_zone == self.end.name:
+                    goal_cpt += 1
+
+                if next_turn - current_turn != 1:
                     Utils.print_rgb(
-                        f"D{y + 1}-{paths[y][cpt][0]}",
-                        color_rgb[str(self.zones[paths[y][cpt][0]].color).upper()],
+                        f"D{y + 1}-{current_zone}-{next_zone}",
+                        color_rgb[str(self.zones[next_zone].color).upper()],
+                    )
+                else:
+                    Utils.print_rgb(
+                        f"D{y + 1}-{next_zone}",
+                        color_rgb[str(self.zones[next_zone].color).upper()],
                     )
             print()
             cpt += 1
