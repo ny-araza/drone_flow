@@ -1,5 +1,6 @@
 from .zone import Zone
 
+
 class Utils:
     @staticmethod
     def read_file(file_path: str) -> str:
@@ -18,3 +19,8 @@ class Utils:
             print(f"is_start: {zone.is_start}")
             print(f"is_end: {zone.is_end}")
             print(f"max_drones: {zone.max_drones}")
+
+    @staticmethod
+    def print_rgb(text, rgb: tuple[int, int, int]) -> None:
+        r, g, b = rgb
+        print(f"\033[38;2;{r};{g};{b}m{text}\033[0m", end=" ")

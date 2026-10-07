@@ -2,13 +2,16 @@ import heapq
 from typing import Any
 
 import pygame as pg
+from colorama import Fore, Style
+from pydantic_core.core_schema import tuple_positional_schema
 from pygame.font import Font
 from pygame.surface import Surface
 
-from .color import color_rgb
 from src.error import ParseError
 from src.zone import Zone
 
+from .color import color_rgb
+from .utils import Utils
 from .zone import TypeZone
 
 INF = float("inf")
@@ -45,6 +48,7 @@ class Planner:
 
         self.zone_use: dict[tuple[str, int], int] = {}
         self.link_use: dict[tuple[frozenset, int], int] = {}
+        self.timeline: dict[int, list[tuple[str, str]]]
 
     def get_loading(self) -> bool:
         return self.loading
@@ -64,6 +68,7 @@ class Planner:
 
     def plan_all(self) -> list[list[Action]]:
         plans: list[list[Action]] = []
+        paths: list[list[tuple[str, int]]] = []
         for i in range(self.nb_drones):
             path = self._find_path()
             if path is None:
@@ -71,8 +76,22 @@ class Planner:
                 plans.append([])
                 continue
             self._reserve(path)
-            
+            paths.append(path)
             plans.append(self._to_actions(path))
+
+        cpt = 0
+        goal_cpt = 0
+        while goal_cpt != self.nb_drones:
+            for y in range(len(paths)):
+                if cpt < len(paths[y]):
+                    if paths[y][cpt][0] == self.end.name:
+                        goal_cpt += 1
+                    Utils.print_rgb(
+                        f"D{y + 1}-{paths[y][cpt][0]}",
+                        color_rgb[str(self.zones[paths[y][cpt][0]].color).upper()],
+                    )
+            print()
+            cpt += 1
 
         self.loading = False
         return plans
