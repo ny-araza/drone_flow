@@ -24,7 +24,6 @@ class Display:
         map_path: str,
         width: int = 1280,
         height: int = 960,
-        size_pixel: int = 50,
         cell_size: int = 60,
     ):
         self.parse: Parse = Parse()

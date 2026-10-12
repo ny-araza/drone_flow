@@ -174,21 +174,31 @@ class Parse:
                         )
                 basedata: list[str] = []
                 if key != "connection":
-                    cpt = 0
-                    for c in value:
-                        if c == "[" or c == "]":
-                            cpt += 1
-                    if cpt != 2:
-                        raise ParseError(
-                            f"Line {line} "
-                            "The number of brackets must be two"
-                            )
+                    if self.nb_drones <= 0:
+                        raise ParseError("<nb_drones> must be the top of the map file")
+                    brackets_test = value.split("[")
+                    if len(brackets_test) > 1:
+                        cpt = 0
+                        for c in value:
+                            if c == "[" or c == "]":
+                                cpt += 1
+                        if cpt != 2:
+                            raise ParseError(
+                                f"Line {line} "
+                                "The number of brackets must be two"
+                                )
                     temp_value = value.split("[")
-                    if not value.endswith("]"):
-                        raise ParseError(
-                            f"Line {line} "
-                            "Metadata must be inside brackets [...]"
-                        )
+                    if len(brackets_test) > 1:
+                        if len(temp_value[0].split(" ")) != 5:
+                            raise ParseError(
+                                f"Line {line} "
+                                "Each line must be separated by one space"
+                            )
+                        if not value.endswith("]"):
+                            raise ParseError(
+                                f"Line {line} "
+                                "Metadata must be inside brackets [...]"
+                            )
                     basedata = temp_value[0].strip(" ").split(" ")
                     if len(basedata) != 3:
                         raise ParseError(
@@ -199,12 +209,16 @@ class Parse:
                             "[<metadata_key>=<metadata_value>]"
                         )
                     zone_metadata = []
-                    temp_temp_value = temp_value[1].split(" ")
+                    temp_temp_value = []
+                    if len(brackets_test) > 1:
+                        temp_temp_value = temp_value[1].split(" ")
+                    metadata_dict: dict[str, Any] = {}
+                    if not temp_temp_value:
+                        metadata_dict = {}
                     for meta_val in temp_temp_value:
                         new_temp = meta_val.strip("[]")
                         if new_temp:
                             zone_metadata.append(str(new_temp))
-                    metadata_dict: dict[str, Any] = {}
                     for temp_item in zone_metadata:
                         meta_key, meta_value = temp_item.split("=")
                         if len(temp_item.split("=")) != 2:
@@ -221,7 +235,14 @@ class Parse:
                         )
                     self.sotck_zones(line, key, basedata, metadata_dict, exists_name, coords, coords_set)
                 elif key == "connection":
+                    if self.nb_drones <= 0:
+                        raise ParseError("<nb_drones> must be the top of the map file")
                     connect_data = value.split("[")
+                    if len(connect_data[0].split(" ")) != 3:
+                        raise ParseError(
+                            f"Line {line} "
+                            "Each line must be separated by one space"
+                        )
                     if len(connect_data) > 2:
                         raise ParseError(
                             f"Line {line} "   
@@ -312,6 +333,12 @@ class Parse:
                             f"The {z2} is not in zone list"
                             )
 
+                    if zone1.name == zone2.name:
+                        raise ParseError(
+                            f"Line {line} "
+                            f"Conenction ({zone1.name},{zone2.name}) is not allowed"
+                        )
+                    
                     connection: Connection = Connection(
                         zone1, zone2, temp_metadata
                     )

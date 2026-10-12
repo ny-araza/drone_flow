@@ -68,9 +68,10 @@ class Planner:
                 print(f"No path found for drone {i + 1}")
                 plans.append([])
                 continue
-            self._reserve(path)
-            paths.append(path)
-            plans.append(self._to_actions(path))
+            else:
+                self._reserve(path)
+                paths.append(path)
+                plans.append(self._to_actions(path))
 
         cpt = 0
         goal_cpt = 0
@@ -131,10 +132,6 @@ class Planner:
                     cur = parent[cur]
                 path.reverse()
                 return path
-
-            print(f"i={i} horizon: {self.horizon}")
-            if i == 1:
-                break
 
             if t >= self.horizon:
                 continue
