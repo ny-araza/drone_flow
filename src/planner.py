@@ -23,22 +23,22 @@ class Planner:
         self.start = next((z for z in zones if z.is_start), None)
         self.end = next((z for z in zones if z.is_end), None)
         self.nb_drones = nb_drones
-        self.horizon = 4 * (len(zones) + nb_drones)
+        self.horizon = nb_drones * (len(zones) + nb_drones)
         self.loading = True
         self.adj: dict[str, list[tuple[Zone, frozenset[str], int, int]]] = {
             z.name: [] for z in zones
         }
+
         for conn in connections:
             a, b = conn.zone1, conn.zone2
             key = frozenset((a.name, b.name))
-            cap = int(conn.metadata.get("max_link_drone", 1))
+            cap = int(conn.metadata.get("max_link_capacity", 1))
             for src, dst in ((a, b), (b, a)):
                 kind = self._type(dst)
                 if kind == "blocked":
                     continue
                 cost = 2 if kind == "restricted" else 1
                 self.adj[src.name].append((dst, key, cap, cost))
-
         self.zone_use: dict[tuple[str, int], int] = {}
         self.link_use: dict[tuple[frozenset[str], int], int] = {}
         self.timeline: dict[int, list[tuple[str, str]]]
@@ -115,6 +115,7 @@ class Planner:
         heap: list[tuple[int, int, str]] = [(0, 0, self.start.name)]
         done: set[tuple[str, int]] = set()
         i = 0
+
         while heap:
             t, pen, name = heapq.heappop(heap)
             state = (name, t)
@@ -130,6 +131,10 @@ class Planner:
                     cur = parent[cur]
                 path.reverse()
                 return path
+
+            print(f"i={i} horizon: {self.horizon}")
+            if i == 1:
+                break
 
             if t >= self.horizon:
                 continue
