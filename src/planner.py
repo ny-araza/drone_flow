@@ -1,6 +1,8 @@
 import heapq
+import os, sys, pygame
+
 from typing import Any
-from .error import ParseError
+from .error import PathFindingError
 
 from src.zone import Zone
 
@@ -28,7 +30,8 @@ class Planner:
         self.adj: dict[str, list[tuple[Zone, frozenset[str], int, int]]] = {
             z.name: [] for z in zones
         }
-        goal_cpt = 0
+        self.no_path_found = False
+
         for conn in connections:
             a, b = conn.zone1, conn.zone2
             key = frozenset((a.name, b.name))
@@ -60,21 +63,33 @@ class Planner:
         return zone.max_drones
 
     def plan_all(self) -> list[list[Action]]:
+
         plans: list[list[Action]] = []
+
         paths: list[list[tuple[str, int]]] = []
+
+        cpt_plan_not_found = 0
+
         for i in range(self.nb_drones):
             path = self._find_path()
             if path is None:
                 print(f"No path found for drone {i + 1}")
                 plans.append([])
+                cpt_plan_not_found += 1
                 continue
             else:
                 self._reserve(path)
                 paths.append(path)
                 plans.append(self._to_actions(path))
 
+        if cpt_plan_not_found == len(plans):
+            self.no_path_found = True
+            # pygame.quit()
+            # sys.exit()
+
         cpt = 0
         goal_cpt = 0
+
         while goal_cpt != self.nb_drones:
             for y in range(len(paths)):
                 if cpt + 1 >= len(paths[y]):
@@ -119,7 +134,9 @@ class Planner:
 
         while heap:
             t, pen, name = heapq.heappop(heap)
+
             state = (name, t)
+
             if state in done:
                 continue
             done.add(state)

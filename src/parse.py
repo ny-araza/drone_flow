@@ -257,7 +257,6 @@ class Parse:
                             "Each line must be separated by one space"
                         )
                     elif len(test_brackets_connection) == 2:
-                        print("value split ", value.split("["))
                         if len(value.split("[")) != 1:
                             raise ParseError(
                             f"Line {line} "
@@ -293,7 +292,6 @@ class Parse:
                     temp_metadata: dict[str, Any] = {}
 
                     if temp_meta_con:
-                        print("temp_meta_con ", temp_meta_con)
                         if " " in temp_meta_con:
                             raise ParseError(
                                 f"Line {line} "    

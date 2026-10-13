@@ -1,5 +1,5 @@
 import threading
-
+import sys, os
 import pygame as pg
 
 from src.drones import Drone
@@ -37,9 +37,10 @@ class Display:
         self.offset_x = 0
         self.offset_y = 0
         pg.init()
-        self.screen = pg.display.set_mode((self.width, self.height))
+        self.screen: pg.Surface | None = None 
         self.clock = pg.time.Clock()
         self.font = pg.font.Font(None, 24)
+        self.plans = []
 
 
 
@@ -101,6 +102,7 @@ class Display:
         self.screen.blit(text_drawed, (x, y))
 
     def display_window(self) -> None:
+
         running = True
         dragging = False
 
@@ -121,7 +123,6 @@ class Display:
             if zone.is_start:
                 start_zone = zone
 
-        self._update_boxes()
 
         plans: list[list[Action]] = []
         loading = True
@@ -144,12 +145,8 @@ class Display:
                 plans = result
                 loading = False
 
-            threading.Thread(target=calculate, daemon=True).start()
-
-        list_drones: list[Drone] = [
-            Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
-            for _ in range(self.parse.nb_drones)
-        ]
+            if not planner.no_path_found:
+                threading.Thread(target=calculate, daemon=True).start()
 
         total_turns = 0
         current_turn = 0
@@ -169,175 +166,184 @@ class Display:
 
         start_planning()
 
+        self._update_boxes()
+
+        self.screen = pg.display.set_mode((self.width, self.height))
+
+        list_drones: list[Drone] = [
+            Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
+            for _ in range(self.parse.nb_drones)
+        ]
+
         while running:
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    running = False
+                for event in pg.event.get():
+                    if event.type == pg.QUIT:
+                        running = False
 
-                elif event.type == pg.KEYDOWN:
-                    if event.key in (pg.K_KP_MINUS, pg.K_MINUS):
-                        self._zoom(-ZOOM_STEP)
-                    elif event.key in (pg.K_KP_PLUS, pg.K_PLUS):
-                        self._zoom(ZOOM_STEP)
+                    elif event.type == pg.KEYDOWN:
+                        if event.key in (pg.K_KP_MINUS, pg.K_MINUS):
+                            self._zoom(-ZOOM_STEP)
+                        elif event.key in (pg.K_KP_PLUS, pg.K_PLUS):
+                            self._zoom(ZOOM_STEP)
 
-                    elif event.key == pg.K_r:
-                        restart = True
+                        elif event.key == pg.K_r:
+                            restart = True
 
-                    elif event.key == pg.K_SPACE:
-                        pause = not pause
+                        elif event.key == pg.K_SPACE:
+                            pause = not pause
 
-                    elif event.key == pg.K_p:
-                        display_name = not display_name
+                        elif event.key == pg.K_p:
+                            display_name = not display_name
 
-                    elif event.key == pg.K_d:
-                        display_stats = not display_stats
+                        elif event.key == pg.K_d:
+                            display_stats = not display_stats
 
-                elif event.type == pg.MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        dragging = True
-                    elif event.button == 4:
-                        self._zoom(ZOOM_STEP)
-                    elif event.button == 5:
-                        self._zoom(-ZOOM_STEP)
+                    elif event.type == pg.MOUSEBUTTONDOWN:
+                        if event.button == 1:
+                            dragging = True
+                        elif event.button == 4:
+                            self._zoom(ZOOM_STEP)
+                        elif event.button == 5:
+                            self._zoom(-ZOOM_STEP)
 
-                elif event.type == pg.MOUSEMOTION and dragging:
-                    dx, dy = event.rel
-                    self.offset_x += dx
-                    self.offset_y += dy
-                    self._update_boxes()
+                    elif event.type == pg.MOUSEMOTION and dragging:
+                        dx, dy = event.rel
+                        self.offset_x += dx
+                        self.offset_y += dy
+                        self._update_boxes()
 
-                elif event.type == pg.MOUSEBUTTONUP and event.button == 1:
-                    dragging = False
+                    elif event.type == pg.MOUSEBUTTONUP and event.button == 1:
+                        dragging = False
 
-            self.screen.fill((21, 0, 79))
-            if loading:
-                self.draw_loading(angle)
+                self.screen.fill((21, 0, 79))
+                if loading:
+                    self.draw_loading(angle)
 
-                angle = (angle + 5) % 360
+                    angle = (angle + 5) % 360
+
+                    pg.display.flip()
+                    dt = self.clock.tick(FPS) / 1000
+
+                    continue
+
+                total_turns = max(
+                    (len(p) for p in plans),
+                    default=0,
+                )
+
+                if finished and restart:
+                    list_drones = [
+                        Drone(
+                            start_zone.x, start_zone.y,
+                            "./images/drone_50x50.png"
+                        )
+                        for _ in range(self.parse.nb_drones)
+                    ]
+                    finished = False
+                    current_turn = 0
+                    dt = 0.0
+
+                for conn in self.parse.list_connections:
+                    pos1 = self.boxes[zone_index[conn.zone1.name]].center
+                    pos2 = self.boxes[zone_index[conn.zone2.name]].center
+                    pg.draw.line(self.screen, color_rgb["WHITE"], pos1, pos2, 2)
+
+                show_names = display_name
+                zone_font = pg.font.Font(None, 24) if show_names else None
+                margin = max(2, self.cell_size // 12)
+
+                for i, box in enumerate(self.boxes):
+                    pg.draw.rect(
+                        self.screen,
+                        color_rgb[str(colors[i]).upper()], box
+                    )
+
+                    if zone_font is not None:
+                        text = zone_font.render(
+                            zones[i].name,
+                            True, color_rgb["WHITE"]
+                        )
+                        text_rect = text.get_rect()
+                        text_rect.midtop = (box.centerx, box.bottom + margin)
+                        self.screen.blit(text, text_rect)
+
+                if not finished and not any(d.moving for d in list_drones):
+                    current_turn += 1
+                    if current_turn > total_turns:
+                        finished = True
+                        restart = False
+                        current_turn -= 1
+                    else:
+                        for drone, plan in zip(list_drones, plans):
+                            if current_turn <= len(plan):
+                                action = plan[current_turn - 1]
+                                if action is not None:
+                                    drone.target = action
+                                    drone.moving = True
+
+                for i, drone in enumerate(list_drones):
+                    if drone.moving and drone.target is not None:
+                        if drone.move_to(drone.target[0], drone.target[1], dt):
+                            drone.turn += 1
+                            drone.moving = False
+
+                    drone.draw(
+                        self.screen, self.cell_size,
+                        self.offset_x, self.offset_y
+                    )
+
+                    sx, sy = drone.screen_pos(
+                        self.cell_size, self.offset_x,
+                        self.offset_y
+                    )
+                    label = self.font.render(
+                        f"D{i + 1}: {drone.turn}", True, color_rgb["WHITE"]
+                    )
+                    label_rect = label.get_rect()
+                    label_rect.midbottom = (sx, sy - self.cell_size // 4)
+                    self.screen.blit(label, label_rect)
+
+                if display_stats:
+                    self.draw_text(
+                        f"Tour : {current_turn}"
+                        + (" (terminé)" if finished else ""),
+                        "green",
+                        10,
+                        10,
+                    )
+                    self.draw_text(
+                        "Average turn for each drone: "
+                        f"{self._average_turn(list_drones)}",
+                        "green",
+                        10,
+                        text_margin + MAX_ZONE_FONT,
+                    )
+                    self.draw_text(
+                        f"Total path cost: {total_turns * len(list_drones)}",
+                        "green",
+                        10,
+                        text_margin + (MAX_ZONE_FONT * 2),
+                    )
+                    self.draw_text(
+                        restart_option_label,
+                        "white",
+                        (self.width - 240),
+                        10,
+                    )
+                    self.draw_text(
+                        zone_name_option_label,
+                        "white",
+                        (self.width - 240),
+                        text_margin + (MAX_ZONE_FONT),
+                    )
+
+                    self.draw_text(
+                        stats_option_label,
+                        "white",
+                        (self.width - 240),
+                        text_margin + (MAX_ZONE_FONT * 2),
+                    )
 
                 pg.display.flip()
                 dt = self.clock.tick(FPS) / 1000
-
-                continue
-
-            total_turns = max(
-                (len(p) for p in plans),
-                default=0,
-            )
-
-            if finished and restart:
-                list_drones = [
-                    Drone(
-                        start_zone.x, start_zone.y,
-                        "./images/drone_50x50.png"
-                    )
-                    for _ in range(self.parse.nb_drones)
-                ]
-                finished = False
-                current_turn = 0
-                dt = 0.0
-
-            for conn in self.parse.list_connections:
-                pos1 = self.boxes[zone_index[conn.zone1.name]].center
-                pos2 = self.boxes[zone_index[conn.zone2.name]].center
-                pg.draw.line(self.screen, color_rgb["WHITE"], pos1, pos2, 2)
-
-            show_names = display_name
-            zone_font = pg.font.Font(None, 24) if show_names else None
-            margin = max(2, self.cell_size // 12)
-
-            for i, box in enumerate(self.boxes):
-                pg.draw.rect(
-                    self.screen,
-                    color_rgb[str(colors[i]).upper()], box
-                )
-
-                if zone_font is not None:
-                    text = zone_font.render(
-                        zones[i].name,
-                        True, color_rgb["WHITE"]
-                    )
-                    text_rect = text.get_rect()
-                    text_rect.midtop = (box.centerx, box.bottom + margin)
-                    self.screen.blit(text, text_rect)
-
-            if not finished and not any(d.moving for d in list_drones):
-                current_turn += 1
-                if current_turn > total_turns:
-                    finished = True
-                    restart = False
-                    current_turn -= 1
-                else:
-                    for drone, plan in zip(list_drones, plans):
-                        if current_turn <= len(plan):
-                            action = plan[current_turn - 1]
-                            if action is not None:
-                                drone.target = action
-                                drone.moving = True
-
-            for i, drone in enumerate(list_drones):
-                if drone.moving and drone.target is not None:
-                    if drone.move_to(drone.target[0], drone.target[1], dt):
-                        drone.turn += 1
-                        drone.moving = False
-
-                drone.draw(
-                    self.screen, self.cell_size,
-                    self.offset_x, self.offset_y
-                )
-
-                sx, sy = drone.screen_pos(
-                    self.cell_size, self.offset_x,
-                    self.offset_y
-                )
-                label = self.font.render(
-                    f"D{i + 1}: {drone.turn}", True, color_rgb["WHITE"]
-                )
-                label_rect = label.get_rect()
-                label_rect.midbottom = (sx, sy - self.cell_size // 4)
-                self.screen.blit(label, label_rect)
-
-            if display_stats:
-                self.draw_text(
-                    f"Tour : {current_turn}"
-                    + (" (terminé)" if finished else ""),
-                    "green",
-                    10,
-                    10,
-                )
-                self.draw_text(
-                    "Average turn for each drone: "
-                    f"{self._average_turn(list_drones)}",
-                    "green",
-                    10,
-                    text_margin + MAX_ZONE_FONT,
-                )
-                self.draw_text(
-                    f"Total path cost: {total_turns * len(list_drones)}",
-                    "green",
-                    10,
-                    text_margin + (MAX_ZONE_FONT * 2),
-                )
-                self.draw_text(
-                    restart_option_label,
-                    "white",
-                    (self.width - 240),
-                    10,
-                )
-                self.draw_text(
-                    zone_name_option_label,
-                    "white",
-                    (self.width - 240),
-                    text_margin + (MAX_ZONE_FONT),
-                )
-
-                self.draw_text(
-                    stats_option_label,
-                    "white",
-                    (self.width - 240),
-                    text_margin + (MAX_ZONE_FONT * 2),
-                )
-
-            pg.display.flip()
-            dt = self.clock.tick(FPS) / 1000
         pg.quit()
