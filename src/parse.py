@@ -5,7 +5,7 @@ from pydantic import ValidationError
 from .connection import Connection
 from .error import ParseError
 from .validation import ZoneValidation
-from .zone import Zone, ColorType, TypeZone
+from .zone import ColorType, TypeZone, Zone
 
 
 class Parse:
@@ -14,27 +14,27 @@ class Parse:
         self.list_zones: list[Zone] = []
         self.nb_drones: int = 0
 
-    def check_unique_zone_name(
-        self, name: str,
-        zones_name: list[str]
-    ) -> list[str]:
+    def check_unique_zone_name(self, name: str, zones_name: list[str]) -> list[str]:
         if name in zones_name:
             return []
         zones_name.append(name)
         return zones_name
 
     def validate_zone(
-        self, line: int, name: str, x: str, y: str, metadata_dict: dict[str, Any]
+        self,
+        line: int,
+        name: str,
+        x: str,
+        y: str,
+        metadata_dict: dict[str, Any],
+        map_path: str,
     ) -> bool:
         try:
             max_drones = metadata_dict.get("max_drones", None)
             if max_drones:
                 n = int(max_drones)
                 if n <= 0:
-                    raise ParseError(
-                        f"Line {line} "
-                        "max_drones must be greater than 0"
-                    )
+                    raise ParseError(f"Line {line} max_drones must be greater than 0")
             ZoneValidation(
                 name=name,
                 x=int(x),
@@ -48,12 +48,8 @@ class Parse:
             return True
         except ValidationError as e:
             for error in e.errors():
-                raise ParseError(
-                    f"Line {line} "
-                    f"{error['msg']}"
-                )
+                raise ParseError(f"{map_path}: Line {line} {error['msg']}")
             return False
-
 
     def sotck_zones(
         self,
@@ -63,7 +59,8 @@ class Parse:
         metadata_dict: dict[str, Any],
         exists_name: list[str],
         coords: list[tuple[int, int]],
-        coords_set: set
+        coords_set: set,
+        map_path: str,
     ) -> None:
         name, x, y = basedata
         coords.append((x, y))
@@ -71,12 +68,13 @@ class Parse:
             coords_set.add((x, y))
         else:
             raise ParseError(
+                f"{map_path}: "
                 f"Line {line} "
                 f"The {(int(x), int(y))} {name} point is "
                 "overlap with another zone point"
             )
         if self.check_unique_zone_name(name, exists_name):
-            if self.validate_zone(line, name, x, y, metadata_dict):
+            if self.validate_zone(line, name, x, y, metadata_dict, map_path):
                 if key == "start_hub":
                     self.list_zones.append(
                         Zone(
@@ -120,28 +118,27 @@ class Parse:
                     )
                 else:
                     raise ParseError(
+                        f"{map_path}: "
                         f"Line {line} "
                         f"{key} key must be between <start_hub>, <hub>, <end_hub>"
                     )
         else:
             raise ParseError(
-                f"Line: {line}"
-                f"{name} is not an unique zone name"
+                f"{map_path}: Line: {line}{name} is not an unique zone name"
             )
 
-    def check_key_metadata(self,keys: list[str]) -> bool:
+    def check_key_metadata(self, keys: list[str]) -> bool:
         all_key_metadata: list[str] = ["zone", "color", "max_drones"]
         for key in keys:
             if key not in all_key_metadata:
                 return False
         return True
 
-    def parse(self, data: str) -> None:
+    def parse(self, data: str, map_path: str) -> None:
         if not ("start_hub" in data and "end_hub" in data):
             raise ParseError(
-                f"Line: {line}"
-                "map file must contain 'start_hub' and 'end_hub'"
-                )
+                f"{map_path}: map file must contain 'start_hub' and 'end_hub'"
+            )
         temp: list[str] = data.split("\n")
         exists_name: list[str] = []
         coords: list[tuple[int, int]] = []
@@ -152,6 +149,7 @@ class Parse:
                 item = tmp.split(":")
                 if len(item) != 2:
                     raise ParseError(
+                        f"{map_path}: "
                         f"Line {line} "
                         "One single ':' "
                         "per line must be present in the map file"
@@ -162,6 +160,7 @@ class Parse:
                         self.nb_drones = int(value)
                         if self.nb_drones <= 0:
                             raise ParseError(
+                                f"{map_path}: "
                                 f"Line {line} "
                                 "'nb_drones' must be greater than 0 and int"
                             )
@@ -169,8 +168,8 @@ class Parse:
                     except ValueError:
                         self.nb_drones = 0
                         raise ParseError(
-                            f"Line {line} "
-                            "'nb_drones' must be int and positive"
+                            f"{map_path}: "
+                            f"Line {line} 'nb_drones' must be int and positive"
                         )
                 basedata: list[str] = []
                 if key != "connection":
@@ -184,24 +183,25 @@ class Parse:
                                 cpt += 1
                         if cpt != 2:
                             raise ParseError(
-                                f"Line {line} "
-                                "The number of brackets must be two"
-                                )
+                                f"{map_path}: "
+                                f"Line {line} The number of brackets must be two"
+                            )
                     temp_value = value.split("[")
                     if len(brackets_test) > 1:
                         if len(temp_value[0].split(" ")) != 5:
                             raise ParseError(
-                                f"Line {line} "
-                                "Each line must be separated by one space"
+                                f"{map_path}: "
+                                f"Line {line} Each line must be separated by one space"
                             )
                         if not value.endswith("]"):
                             raise ParseError(
-                                f"Line {line} "
-                                "Metadata must be inside brackets [...]"
+                                f"{map_path}: "
+                                f"Line {line} Metadata must be inside brackets [...]"
                             )
                     basedata = temp_value[0].strip(" ").split(" ")
                     if len(basedata) != 3:
                         raise ParseError(
+                            f"{map_path}: "
                             f"Line {line} "
                             "An error occured on map file line: "
                             "line must be: <type_zone>: "
@@ -222,26 +222,37 @@ class Parse:
                     for temp_item in zone_metadata:
                         if not "=" in temp_item:
                             raise ParseError(
-                                f"Line {line} "        
-                                "Zone metadata must like " \
+                                f"{map_path}: "
+                                f"Line {line} "
+                                "Zone metadata must like "
                                 "this: [<key_metadata>=<value_metadata>]"
                             )
                         meta_key, meta_value = temp_item.split("=")
                         if len(temp_item.split("=")) != 2:
                             raise ParseError(
-                                f"Line {line} "        
-                                "Metadata must be [meta_data=value]"
+                                f"{map_path}: "
+                                f"Line {line} Metadata must be [meta_data=value]"
                             )
                         metadata_dict.update({meta_key: meta_value})
 
                     if not self.check_key_metadata(list(metadata_dict.keys())):
                         raise ParseError(
+                            f"{map_path}: "
                             f"Line {line} "
                             "metadata key must be "
                             "'zone', 'color' or 'max_drones'"
                         )
 
-                    self.sotck_zones(line, key, basedata, metadata_dict, exists_name, coords, coords_set)
+                    self.sotck_zones(
+                        line,
+                        key,
+                        basedata,
+                        metadata_dict,
+                        exists_name,
+                        coords,
+                        coords_set,
+                        map_path
+                    )
 
                 elif key == "connection":
                     if self.nb_drones <= 0:
@@ -252,20 +263,21 @@ class Parse:
                     test_brackets_connection = value.split(" ")
                     if len(test_brackets_connection) == 3:
                         if len(value.split("[")) != 2:
-                          raise ParseError(
-                            f"Line {line} "
-                            "Each line must be separated by one space"
-                        )
+                            raise ParseError(
+                                f"{map_path}: "
+                                f"Line {line} Each line must be separated by one space"
+                            )
                     elif len(test_brackets_connection) == 2:
                         if len(value.split("[")) != 1:
                             raise ParseError(
-                            f"Line {line} "
-                            "Each line must be separated by one space"
-                        ) 
+                                f"{map_path}: "
+                                f"Line {line} Each line must be separated by one space"
+                            )
 
                     if len(connect_data) > 2:
                         raise ParseError(
-                            f"Line {line} "   
+                            f"{map_path}: "
+                            f"Line {line} "
                             "connection in mapfile must be <zone1>-<zone2> "
                             "[<metadata_key>=<metadata_value>]"
                         )
@@ -283,7 +295,8 @@ class Parse:
 
                     if len(basedata_con) != 2:
                         raise ParseError(
-                            f"Line {line} "    
+                            f"{map_path}: "
+                            f"Line {line} "
                             "connection in mapfile must be <zone1>-<zone2> "
                             "[<metadata_key>=<metadata_value>]"
                         )
@@ -294,14 +307,16 @@ class Parse:
                     if temp_meta_con:
                         if " " in temp_meta_con:
                             raise ParseError(
-                                f"Line {line} "    
-                                "Metadata conenction must like " \
+                                f"{map_path}: "
+                                f"Line {line} "
+                                "Metadata conenction must like "
                                 "this: [max_link_capacity=<metadata_value>]"
                             )
                         metadata_con = temp_meta_con.split("=")
                         if len(metadata_con) != 2:
                             raise ParseError(
-                                f"Line {line} "    
+                                f"{map_path}: "
+                                f"Line {line} "
                                 "connection in mapfile "
                                 "must be <zone1>-<zone2> "
                                 "[<metadata_key>=<metadata_value>]"
@@ -309,6 +324,7 @@ class Parse:
                         key, value = metadata_con
                         if key != "max_link_capacity" or int(value) <= 0:
                             raise ParseError(
+                                f"{map_path}: "
                                 f"Line {line} "
                                 "For connection metadakey must be "
                                 "[max_link_capacity: <metadata_value>] "
@@ -318,6 +334,7 @@ class Parse:
                             temp_metadata.update({key: int(value)})
                         except ValueError:
                             raise ParseError(
+                                f"{map_path}: "
                                 f"Line {line} "
                                 "In connection: metadata_value "
                                 "must be > 0 and numbers"
@@ -354,12 +371,10 @@ class Parse:
                         if zone.is_end:
                             end_cpt += 1
 
-
                     if not zone1.name:
                         raise ParseError(
-                            f"Line {line} "
-                            f"The {z1} is not in zone list"
-                            )
+                            f"{map_path}: Line {line} The {z1} is not in zone list"
+                        )
 
                     for zone in self.list_zones:
                         if zone.name == z2.strip(" "):
@@ -368,18 +383,16 @@ class Parse:
 
                     if not zone2.name:
                         raise ParseError(
-                            f"Line {line} "
-                            f"The {z2} is not in zone list"
-                            )
+                            f"{map_path}: Line {line} The {z2} is not in zone list"
+                        )
 
                     if zone1.name == zone2.name:
                         raise ParseError(
+                            f"{map_path}: "
                             f"Line {line} "
                             f"Conenction ({zone1.name},{zone2.name}) is not allowed"
                         )
-                    
-                    connection: Connection = Connection(
-                        zone1, zone2, temp_metadata
-                    )
+
+                    connection: Connection = Connection(zone1, zone2, temp_metadata)
 
                     self.list_connections.append(connection)

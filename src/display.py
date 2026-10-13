@@ -31,7 +31,7 @@ class Display:
     ):
         self.parse: Parse = Parse()
         temp_data = Utils.read_file(map_path)
-        self.parse.parse(temp_data)
+        self.parse.parse(temp_data, map_path)
         self.width = width
         self.height = height
         self.cell_size = cell_size
