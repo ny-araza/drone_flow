@@ -5,7 +5,7 @@ PY_VENV=$(VENV)/bin/python
 TARGET=installed
 export UV_CACHE_DIR=/home/$(USER)/goinfre/uv_cache
 
-all:$(TARGET) install uv_add_package
+all:$(TARGET) install uv_add_package run
 
 uv_add_package:
 	@$(PY_VENV) -m uv add pygame colorama flake8 mypy pydantic
@@ -17,7 +17,7 @@ $(TOML):
 	@$(PY_VENV) -m uv init
 
 run:
-	@$(PY_VENV) -m uv run python -m src maps
+	$(PY_VENV) -m uv run python -m src maps
 
 install:$(TARGET)
 	@python -m venv $(VENV)

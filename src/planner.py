@@ -46,6 +46,10 @@ class Planner:
         self.link_use: dict[tuple[frozenset[str], int], int] = {}
         self.timeline: dict[int, list[tuple[str, str]]]
 
+    def check_reachable(self) -> None:
+        if self._find_path() is None:
+            raise PathFindingError("No path from start to end")
+
     def get_loading(self) -> bool:
         return self.loading
 
@@ -82,13 +86,14 @@ class Planner:
                 paths.append(path)
                 plans.append(self._to_actions(path))
 
-        if cpt_plan_not_found == len(plans):
-            self.no_path_found = True
-            # pygame.quit()
-            # sys.exit()
-
         cpt = 0
         goal_cpt = 0
+
+        if cpt_plan_not_found == len(plans):
+            self.loading = False
+            raise PathFindingError("jfsdf fjds jfdshfdsflsdfmds")
+
+            
 
         while goal_cpt != self.nb_drones:
             for y in range(len(paths)):
@@ -119,6 +124,9 @@ class Planner:
             cpt += 1
 
         self.loading = False
+
+
+
         return plans
 
     def _find_path(self) -> list[tuple[str, int]] | None:
