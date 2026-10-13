@@ -1,6 +1,6 @@
 import heapq
 from typing import Any
-
+from .error import ParseError
 
 from src.zone import Zone
 
@@ -28,7 +28,7 @@ class Planner:
         self.adj: dict[str, list[tuple[Zone, frozenset[str], int, int]]] = {
             z.name: [] for z in zones
         }
-
+        goal_cpt = 0
         for conn in connections:
             a, b = conn.zone1, conn.zone2
             key = frozenset((a.name, b.name))

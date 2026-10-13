@@ -41,6 +41,8 @@ class Display:
         self.clock = pg.time.Clock()
         self.font = pg.font.Font(None, 24)
 
+
+
     def _update_boxes(self) -> None:
         half = self.cell_size // 2
         for box, zone in zip(self.boxes, self.parse.list_zones):

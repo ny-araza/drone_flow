@@ -220,6 +220,12 @@ class Parse:
                         if new_temp:
                             zone_metadata.append(str(new_temp))
                     for temp_item in zone_metadata:
+                        if not "=" in temp_item:
+                            raise ParseError(
+                                f"Line {line} "        
+                                "Zone metadata must like " \
+                                "this: [<key_metadata>=<value_metadata>]"
+                            )
                         meta_key, meta_value = temp_item.split("=")
                         if len(temp_item.split("=")) != 2:
                             raise ParseError(
@@ -227,45 +233,73 @@ class Parse:
                                 "Metadata must be [meta_data=value]"
                             )
                         metadata_dict.update({meta_key: meta_value})
+
                     if not self.check_key_metadata(list(metadata_dict.keys())):
                         raise ParseError(
                             f"Line {line} "
                             "metadata key must be "
                             "'zone', 'color' or 'max_drones'"
                         )
+
                     self.sotck_zones(line, key, basedata, metadata_dict, exists_name, coords, coords_set)
+
                 elif key == "connection":
                     if self.nb_drones <= 0:
                         raise ParseError("<nb_drones> must be the top of the map file")
+
                     connect_data = value.split("[")
-                    if len(connect_data[0].split(" ")) != 3:
-                        raise ParseError(
+
+                    test_brackets_connection = value.split(" ")
+                    if len(test_brackets_connection) == 3:
+                        if len(value.split("[")) != 2:
+                          raise ParseError(
                             f"Line {line} "
                             "Each line must be separated by one space"
                         )
+                    elif len(test_brackets_connection) == 2:
+                        print("value split ", value.split("["))
+                        if len(value.split("[")) != 1:
+                            raise ParseError(
+                            f"Line {line} "
+                            "Each line must be separated by one space"
+                        ) 
+
                     if len(connect_data) > 2:
                         raise ParseError(
                             f"Line {line} "   
                             "connection in mapfile must be <zone1>-<zone2> "
                             "[<metadata_key>=<metadata_value>]"
                         )
+
                     temp_base_con: str = ""
                     temp_meta_con: str = ""
+
                     if len(connect_data) == 1:
                         temp_base_con = connect_data[0]
                     elif len(connect_data) == 2:
                         temp_base_con = connect_data[0].strip(" []")
                         temp_meta_con = connect_data[1].strip(" []")
+
                     basedata_con = temp_base_con.split("-")
+
                     if len(basedata_con) != 2:
                         raise ParseError(
                             f"Line {line} "    
                             "connection in mapfile must be <zone1>-<zone2> "
                             "[<metadata_key>=<metadata_value>]"
                         )
+
                     metadata_con: list[str] = []
                     temp_metadata: dict[str, Any] = {}
+
                     if temp_meta_con:
+                        print("temp_meta_con ", temp_meta_con)
+                        if " " in temp_meta_con:
+                            raise ParseError(
+                                f"Line {line} "    
+                                "Metadata conenction must like " \
+                                "this: [max_link_capacity=<metadata_value>]"
+                            )
                         metadata_con = temp_meta_con.split("=")
                         if len(metadata_con) != 2:
                             raise ParseError(
@@ -311,10 +345,17 @@ class Parse:
                         y=0,
                     )
                     z1, z2 = basedata_con
+                    start_cpt = 0
+                    end_cpt = 0
                     for zone in self.list_zones:
                         if zone.name == z1.strip(" "):
                             zone1 = zone
                             break
+                        if zone.is_start:
+                            start_cpt += 1
+                        if zone.is_end:
+                            end_cpt += 1
+
 
                     if not zone1.name:
                         raise ParseError(
