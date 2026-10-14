@@ -27,7 +27,7 @@ class Parse:
         x: str,
         y: str,
         metadata_dict: dict[str, Any],
-        map_path: str,
+        map_path: str
     ) -> bool:
         try:
             max_drones = metadata_dict.get("max_drones", None)
@@ -61,8 +61,19 @@ class Parse:
         coords: list[tuple[int, int]],
         coords_set: set,
         map_path: str,
+        width: int,
+        height: int
     ) -> None:
         name, x, y = basedata
+
+        if not (int(x) < width and int(x) > -(width / 2)) \
+            or not (int(y) < height and int(y) > -(height / 2)) :
+            raise ParseError(
+                f"{map_path}: "
+                f"Line {line} "
+                f"Coords must be between {(width, height)}"
+            )
+
         coords.append((x, y))
         if (x, y) not in coords_set:
             coords_set.add((x, y))
@@ -134,7 +145,7 @@ class Parse:
                 return False
         return True
 
-    def parse(self, data: str, map_path: str) -> None:
+    def parse(self, data: str, map_path: str, width: int, height: int) -> None:
         if not ("start_hub" in data and "end_hub" in data):
             raise ParseError(
                 f"{map_path}: map file must contain 'start_hub' and 'end_hub'"
@@ -158,11 +169,12 @@ class Parse:
                 if key == "nb_drones":
                     try:
                         self.nb_drones = int(value)
-                        if self.nb_drones <= 0:
+                        if self.nb_drones <= 0 or self.nb_drones > 100:
                             raise ParseError(
                                 f"{map_path}: "
                                 f"Line {line} "
-                                "'nb_drones' must be greater than 0 and int"
+                                "'nb_drones' must be greater than 0 and " \
+                                "less than or equal to 100"
                             )
                         continue
                     except ValueError:
@@ -251,7 +263,9 @@ class Parse:
                         exists_name,
                         coords,
                         coords_set,
-                        map_path
+                        map_path,
+                        width, 
+                        height
                     )
 
                 elif key == "connection":

@@ -6,18 +6,22 @@ from .error import ParseError
 from .input import Input
 
 if __name__ == "__main__":
-    try:
-        if not sys.argv[1:] or not os.path.isdir(sys.argv[1:][0]):
-            raise ParseError("'maps' folder does not exist")
-    
-        input: Input = Input(sys.argv[1:][0])
-        input.choose_level()
-        input.select_map_path()
-    
-        display: Display = Display(input.map_path)
-        display.display_window()
-    except KeyboardInterrupt:
-        print("\nPlease be patient!!")
-    except Exception:
-        pass
+    # try:
+    if not sys.argv[1:] or not os.path.isdir(sys.argv[1:][0]):
+        raise ParseError("'maps' folder does not exist")
+
+    height = 960
+    width = 1280
+
+    input: Input = Input(sys.argv[1:][0])
+    input.choose_level()
+    input.select_map_path()
+
+
+    display: Display = Display(input.map_path, width, height)
+    display.display_window()
+    # except KeyboardInterrupt:
+    #     print("\nPlease be patient!!")
+    # except Exception as e:
+    #     pass
 

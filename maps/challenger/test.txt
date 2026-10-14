@@ -2,10 +2,10 @@
 
 nb_drones: 2
 start_hub: start 0 0
-hub: bottleneck 1 0 [color=orange max_drones=50]
+hub: bottleneck 10 1 [color=orange max_drones=50]
 hub: wide_area 2 0 [color=blue max_drones=50]
 hub: test1 1 1 [color=blue max_drones=50]
-hub: test2 1 -1 [color=blue max_drones=1 zone=priority]
+hub: test2 1 -1 [color=blue max_drones=50 zone=priority]
 end_hub: goal 5 0 [color=red]
 
 connection: start-bottleneck [max_link_capacity=50]
@@ -14,3 +14,4 @@ connection: bottleneck-wide_area [max_link_capacity=50]
 connection: start-test1 [max_link_capacity=50]
 connection: wide_area-test1 [max_link_capacity=50]
 connection: test1-test2 [max_link_capacity=50]
+connection: test2-goal [max_link_capacity=50]
