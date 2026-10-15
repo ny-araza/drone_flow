@@ -10,3 +10,19 @@ class Utils:
     def print_rgb(text: str, rgb: tuple[int, int, int]) -> None:
         r, g, b = rgb
         print(f"\033[38;2;{r};{g};{b}m{text}\033[0m", end=" ")
+
+    @staticmethod
+    def get_drone_in_each_turn(
+            current_zone: str,
+            next_zone: str,
+            drone: str,
+            zone_drones: dict[str, list[str]]
+        ) -> None:
+        
+            if current_zone != next_zone:
+                if drone in zone_drones[current_zone]:
+                    zone_drones[current_zone].remove(drone)
+
+                if not drone in zone_drones[next_zone]:
+                    zone_drones[next_zone].append(drone)
+

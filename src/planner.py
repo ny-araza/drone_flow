@@ -5,6 +5,7 @@ from typing import Any
 from .error import PathFindingError
 
 from src.zone import Zone
+from .connection import Connection
 
 from .color import color_rgb
 from .utils import Utils
@@ -18,7 +19,7 @@ class Planner:
     def __init__(
         self,
         zones: list[Zone],
-        connections: list[Any],
+        connections: list[Connection],
         nb_drones: int,
     ) -> None:
         self.zones = {z.name: z for z in zones}
@@ -31,6 +32,8 @@ class Planner:
             z.name: [] for z in zones
         }
         self.no_path_found = False
+        self.connections = connections
+
 
         for conn in connections:
             a, b = conn.zone1, conn.zone2
@@ -72,6 +75,7 @@ class Planner:
 
         paths: list[list[tuple[str, int]]] = []
 
+
         cpt_plan_not_found = 0
 
         for i in range(self.nb_drones):
@@ -91,17 +95,38 @@ class Planner:
 
         if cpt_plan_not_found == len(plans):
             self.loading = False
-            raise PathFindingError("jfsdf fjds jfdshfdsflsdfmds")
+            raise PathFindingError("Ar error occured")
 
-            
+
+        zone_drones = {
+            name: [] for name, zone in self.zones.items()
+        }
+        connexion_drones = {
+            frozenset((conn.zone1.name, conn.zone2.name)): [] for conn in self.connections
+        }
+
+
+        for i in range(self.nb_drones):
+            zone_drones[self.start.name].append(f"D{i+1}")
+
 
         while goal_cpt != self.nb_drones:
+                
+
             for y in range(len(paths)):
+
+
                 if cpt + 1 >= len(paths[y]):
                     continue
 
                 current_zone, current_turn = paths[y][cpt]
                 next_zone, next_turn = paths[y][cpt + 1]
+
+                drone = f"D{y + 1}"
+
+                Utils.get_drone_in_each_turn(
+                    current_zone, next_zone, drone, zone_drones
+                )
 
                 if current_zone == next_zone:
                     continue
@@ -110,16 +135,33 @@ class Planner:
                     if next_zone == self.end.name:
                         goal_cpt += 1
 
+                connexion = frozenset((current_zone, next_zone))
+
                 if next_turn - current_turn != 1:
+
                     Utils.print_rgb(
                         f"D{y + 1}-{current_zone}-{next_zone}",
                         color_rgb[str(self.zones[next_zone].color).upper()],
                     )
+
+                    if drone in connexion_drones:
+                        connexion_drones[connexion].remove(drone)
+
+                    if not drone in connexion_drones:
+                        connexion_drones[connexion].append(drone)
+
                 else:
                     Utils.print_rgb(
                         f"D{y + 1}-{next_zone}",
                         color_rgb[str(self.zones[next_zone].color).upper()],
                     )
+
+            print()
+            for name, drones in zone_drones.items():
+                print(f"{name}: {drones}")
+            print()
+            for conn, drones in connexion_drones.items():
+                print(f"{conn}: {drones}")
             print()
             cpt += 1
 

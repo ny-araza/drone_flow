@@ -10,6 +10,10 @@ if __name__ == "__main__":
     if not sys.argv[1:] or not os.path.isdir(sys.argv[1:][0]):
         raise ParseError("'maps' folder does not exist")
 
+    flag = sys.argv[2:]
+
+    print(flag)
+
     height = 960
     width = 1280
 
