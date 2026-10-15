@@ -1,17 +1,16 @@
-import os
 import sys
 import threading
 
 import pygame as pg
 
-from src.drones import Drone
-from src.error import PathFindingError
-from src.planner import Action, Planner
-from src.zone import Zone
+from drones import Drone
+from error import PathFindingError
+from planner import Action, Planner
+from zone import Zone
 
-from .color import color_rgb
-from .parse import Parse
-from .utils import Utils
+from color import color_rgb
+from parse import Parse
+from utils import Utils
 
 MIN_CELL = 50
 MAX_CELL = 200
@@ -43,7 +42,6 @@ class Display:
         self.screen: pg.Surface | None = None
         self.clock = pg.time.Clock()
         self.font = pg.font.Font(None, 24)
-        self.plans = []
 
     def _update_boxes(self) -> None:
         half = self.cell_size // 2
@@ -62,11 +60,17 @@ class Display:
         self._update_boxes()
 
     def draw_loading(self, angle: int) -> None:
-        center = (self.screen.get_width() // 2, self.screen.get_height() // 2)
+
+        if self.screen:
+            center = (
+                self.screen.get_width() // 2,
+                self.screen.get_height() // 2
+            )
 
         radius = 40
 
-        pg.draw.circle(self.screen, (80, 80, 80), center, radius, 5)
+        if self.screen:
+            pg.draw.circle(self.screen, (80, 80, 80), center, radius, 5)
 
         import math
 
@@ -74,7 +78,8 @@ class Display:
         x = center[0] + int(math.cos(rad) * radius)
         y = center[1] + int(math.sin(rad) * radius)
 
-        pg.draw.circle(self.screen, color_rgb["BLUE"], (x, y), 8)
+        if self.screen:
+            pg.draw.circle(self.screen, color_rgb["BLUE"], (x, y), 8)
 
         font = pg.font.Font(None, 36)
 
@@ -84,7 +89,8 @@ class Display:
 
         text_rect = text.get_rect(center=(center[0], center[1] + 80))
 
-        self.screen.blit(text, text_rect)
+        if self.screen:
+            self.screen.blit(text, text_rect)
 
     def _average_turn(self, list_drones: list[Drone]) -> int:
         total_turn = 0
@@ -100,7 +106,8 @@ class Display:
             True,
             color_rgb[color.upper()],
         )
-        self.screen.blit(text_drawed, (x, y))
+        if self.screen:
+            self.screen.blit(text_drawed, (x, y))
 
     def display_window(self) -> None:
 
@@ -181,13 +188,12 @@ class Display:
 
         start_planning()
 
-
         self._update_boxes()
 
         self.screen = pg.display.set_mode((self.width, self.height))
 
         list_drones: list[Drone] = [
-            Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
+            Drone(start_zone.x, start_zone.y, "./drone_50x50.png")
             for _ in range(self.parse.nb_drones)
         ]
 
@@ -249,7 +255,10 @@ class Display:
 
             if finished and restart:
                 list_drones = [
-                    Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
+                    Drone(
+                        start_zone.x, start_zone.y,
+                        "./images/drone_50x50.png"
+                    )
                     for _ in range(self.parse.nb_drones)
                 ]
                 finished = False
@@ -266,10 +275,17 @@ class Display:
             margin = max(2, self.cell_size // 12)
 
             for i, box in enumerate(self.boxes):
-                pg.draw.rect(self.screen, color_rgb[str(colors[i]).upper()], box)
+                pg.draw.rect(
+                    self.screen,
+                    color_rgb[str(colors[i]).upper()],
+                    box
+                )
 
                 if zone_font is not None:
-                    text = zone_font.render(zones[i].name, True, color_rgb["WHITE"])
+                    text = zone_font.render(
+                        zones[i].name, True,
+                        color_rgb["WHITE"]
+                    )
                     text_rect = text.get_rect()
                     text_rect.midtop = (box.centerx, box.bottom + margin)
                     self.screen.blit(text, text_rect)
@@ -294,9 +310,15 @@ class Display:
                         drone.turn += 1
                         drone.moving = False
 
-                drone.draw(self.screen, self.cell_size, self.offset_x, self.offset_y)
+                drone.draw(
+                    self.screen, self.cell_size,
+                    self.offset_x, self.offset_y
+                )
 
-                sx, sy = drone.screen_pos(self.cell_size, self.offset_x, self.offset_y)
+                sx, sy = drone.screen_pos(
+                    self.cell_size, self.offset_x,
+                    self.offset_y
+                )
                 label = self.font.render(
                     f"D{i + 1}: {drone.turn}", True, color_rgb["WHITE"]
                 )
@@ -306,13 +328,15 @@ class Display:
 
             if display_stats:
                 self.draw_text(
-                    f"Tour : {current_turn}" + (" (terminé)" if finished else ""),
+                    f"Tour : {current_turn}" +
+                    (" (terminé)" if finished else ""),
                     "green",
                     10,
                     10,
                 )
                 self.draw_text(
-                    f"Average turn for each drone: {self._average_turn(list_drones)}",
+                    f"Average turn for each "
+                    f"drone: {self._average_turn(list_drones)}",
                     "green",
                     10,
                     text_margin + MAX_ZONE_FONT,

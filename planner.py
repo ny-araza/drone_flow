@@ -1,14 +1,12 @@
 import heapq
-import os, sys, pygame
 
-from typing import Any
-from .error import PathFindingError
+from error import PathFindingError
 
-from src.zone import Zone
-from .connection import Connection
+from zone import Zone
+from connection import Connection
 
-from .color import color_rgb
-from .utils import Utils
+from color import color_rgb
+from utils import Utils
 
 INF = float("inf")
 
@@ -22,18 +20,17 @@ class Planner:
         connections: list[Connection],
         nb_drones: int,
     ) -> None:
-        self.zones = {z.name: z for z in zones}
-        self.start = next((z for z in zones if z.is_start), None)
-        self.end = next((z for z in zones if z.is_end), None)
-        self.nb_drones = nb_drones
-        self.horizon = nb_drones * (len(zones) + nb_drones)
-        self.loading = True
+        self.zones: dict[str, Zone] = {z.name: z for z in zones}
+        self.start: Zone | None = next((z for z in zones if z.is_start), None)
+        self.end: Zone | None = next((z for z in zones if z.is_end), None)
+        self.nb_drones: int = nb_drones
+        self.horizon: int = nb_drones * (len(zones) + nb_drones)
+        self.loading: bool = True
         self.adj: dict[str, list[tuple[Zone, frozenset[str], int, int]]] = {
             z.name: [] for z in zones
         }
-        self.no_path_found = False
-        self.connections = connections
-
+        self.no_path_found: bool = False
+        self.connections: list[Connection] = connections
 
         for conn in connections:
             a, b = conn.zone1, conn.zone2
@@ -75,7 +72,6 @@ class Planner:
 
         paths: list[list[tuple[str, int]]] = []
 
-
         cpt_plan_not_found = 0
 
         for i in range(self.nb_drones):
@@ -97,24 +93,26 @@ class Planner:
             self.loading = False
             raise PathFindingError("Ar error occured")
 
-
-        zone_drones = {
-            name: [] for name, zone in self.zones.items()
-        }
-        connexion_drones = {
-            frozenset((conn.zone1.name, conn.zone2.name)): [] for conn in self.connections
+        zone_drones: dict[str, list[str]] = {
+            name: [] for name, _ in self.zones.items()
         }
 
+        connexion_drones: dict[frozenset[str], list[str]] = {
+            frozenset(
+                (
+                    conn.zone1.name,
+                    conn.zone2.name
+                )
+                ): [] for conn in self.connections
+        }
 
-        for i in range(self.nb_drones):
-            zone_drones[self.start.name].append(f"D{i+1}")
-
+        if self.start:
+            for i in range(self.nb_drones):
+                zone_drones[self.start.name].append(f"D{i+1}")
 
         while goal_cpt != self.nb_drones:
-                
 
             for y in range(len(paths)):
-
 
                 if cpt + 1 >= len(paths[y]):
                     continue
@@ -144,10 +142,9 @@ class Planner:
                         color_rgb[str(self.zones[next_zone].color).upper()],
                     )
 
-                    if drone in connexion_drones:
-                        connexion_drones[connexion].remove(drone)
+                    print("connextion ", self.link_use)
 
-                    if not drone in connexion_drones:
+                    if drone not in connexion_drones[connexion]:
                         connexion_drones[connexion].append(drone)
 
                 else:
@@ -157,6 +154,7 @@ class Planner:
                     )
 
             print()
+            print(f"Turn {cpt + 1}")
             for name, drones in zone_drones.items():
                 print(f"{name}: {drones}")
             print()
@@ -166,8 +164,6 @@ class Planner:
             cpt += 1
 
         self.loading = False
-
-
 
         return plans
 

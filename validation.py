@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, \
         model_validator
-from .zone import TypeZone, ColorType
+from zone import TypeZone, ColorType
 from typing_extensions import Self
 
 

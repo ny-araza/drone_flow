@@ -1,5 +1,5 @@
 import os
-from .error import ParseError
+from error import ParseError
 from colorama import Fore, Style
 
 

@@ -5,23 +5,16 @@ PY_VENV=$(VENV)/bin/python
 TARGET=installed
 export UV_CACHE_DIR=/home/$(USER)/goinfre/uv_cache
 
-all:$(TARGET) install uv_add_package run
+all:$(TARGET) install install_package run
 
-uv_add_package:
-	@$(PY_VENV) -m uv add pygame colorama flake8 mypy pydantic
-
-$(TARGET): $(TOML)
-	@touch $(TARGET)
-
-$(TOML):
-	@$(PY_VENV) -m uv init
+install_package:
+	@$(PY_VENV) -m pip install -r requirements.txt
 
 run:
-	$(PY_VENV) -m uv run python -m src maps
+	$(PY_VENV) main.py maps
 
 install:$(TARGET)
 	@python -m venv $(VENV)
-	@$(PY_VENV) -m pip install uv
 
 lint:
 	@$(PY_VENV) -m flake8 . --exclude=.venv && mypy . --warn-return-any \
@@ -32,14 +25,8 @@ lint-strict:
 	@$(PY_VENV) -m flake8 . --exclude=.venv && mypy --install-types && \
 		mypy . --strict  --exclude .venv/
 
-sync:
-	@$(PY_VENV) -m uv sync
-
 clean:
-	@$(PY_VENV) -m uv cache clean
+	@rm -rf __pycache*
 
-fclean:
-	@rm -rf $(CURENT_DIR)/main.py
-	@rm -rf $(CURENT_DIR)/pyproject.toml
+fclean: clean
 	@rm -rf $(VENV)
-	@rm -rf $(TARGET)

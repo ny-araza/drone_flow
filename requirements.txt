@@ -1,0 +1,5 @@
+pygame 
+colorama 
+flake8 
+mypy 
+pydantic

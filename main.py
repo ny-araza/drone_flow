@@ -1,9 +1,9 @@
 import os
 import sys
 
-from .display import Display
-from .error import ParseError
-from .input import Input
+from display import Display
+from error import ParseError
+from input import Input
 
 if __name__ == "__main__":
     # try:
@@ -21,11 +21,9 @@ if __name__ == "__main__":
     input.choose_level()
     input.select_map_path()
 
-
     display: Display = Display(input.map_path, width, height)
     display.display_window()
     # except KeyboardInterrupt:
     #     print("\nPlease be patient!!")
     # except Exception as e:
     #     pass
-

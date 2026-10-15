@@ -2,7 +2,7 @@
 
 nb_drones: 2
 start_hub: start 0 0
-hub: bottleneck 10 1 [color=orange]
+hub: bottleneck 0 1 [color=orange]
 hub: wide_area 2 0 [color=blue]
 hub: test1 1 1 [color=blue]
 hub: test2 1 -1 [color=blue zone=priority zone=restricted]
