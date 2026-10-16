@@ -93,29 +93,9 @@ class Planner:
             self.loading = False
             raise PathFindingError("Ar error occured")
 
-        zone_drones: dict[str, list[str]] = {
-            name: [] for name, _ in self.zones.items()
-        }
-
-        connexion_drones: dict[frozenset[str], list[str]] = {
-            frozenset(
-                (
-                    conn.zone1.name,
-                    conn.zone2.name
-                )
-                ): [] for conn in self.connections
-        }
-
-        if self.start:
-            for i in range(self.nb_drones):
-                zone_drones[self.start.name].append(f"D{i+1}")
-
         while goal_cpt != self.nb_drones:
 
             print(cpt + 1)
-
-            for drones in connexion_drones.values():
-                drones.clear()
 
             for y in range(len(paths)):
 
@@ -134,19 +114,11 @@ class Planner:
                     if next_zone == self.end.name:
                         goal_cpt += 1
 
-                Utils.get_drone_in_each_turn(
-                    current_zone, next_zone ,drone, zone_drones
-                )
-
                 if next_turn - current_turn != 1:
 
                     Utils.print_rgb(
                         f"D{y + 1}-{current_zone}-{next_zone}",
                         color_rgb[str(self.zones[next_zone].color).upper()],
-                    )
-
-                    Utils.get_connnexion_in_each_turn(
-                        current_zone, next_zone, drone, connexion_drones
                     )
 
                 else:
@@ -155,12 +127,6 @@ class Planner:
                         color_rgb[str(self.zones[next_zone].color).upper()],
                     )
 
-            print()
-            for conn ,drones in zone_drones.items():
-                print(f"{conn}: {drones}")
-            print()
-            for conn, drones in connexion_drones.items():
-                print(f"{conn}: {drones}")
             print()
 
             cpt += 1

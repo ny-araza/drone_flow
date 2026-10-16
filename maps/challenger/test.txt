@@ -8,7 +8,7 @@ hub: test1 1 1 [color=blue]
 hub: test2 1 -1 [color=blue zone=priority zone=restricted]
 end_hub: goal 5 0 [color=red]
 
-connection: start-bottleneck
+connection: start-bottleneck [max_link_capacity=1]
 connection: start-test2
 connection: bottleneck-wide_area
 connection: start-test1
