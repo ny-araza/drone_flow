@@ -25,3 +25,18 @@ class Utils:
 
             if drone not in zone_drones[next_zone]:
                 zone_drones[next_zone].append(drone)
+
+
+    @staticmethod
+    def get_connnexion_in_each_turn(
+        current_zone: str,
+        next_zone: str,
+        drone: str,
+        connexion_drones: dict[frozenset[str], list[str]]
+    ) -> None:
+
+        connexion = frozenset((current_zone, next_zone))
+        if connexion in connexion_drones:
+            if drone not in connexion_drones[connexion]:
+                connexion_drones[connexion].append(drone)
+

@@ -2,7 +2,6 @@ CURENT_DIR=$(CURDIR)
 TOML=$(CURENT_DIR)/pyproject.toml
 VENV=.venv
 PY_VENV=$(VENV)/bin/python
-TARGET=installed
 export UV_CACHE_DIR=/home/$(USER)/goinfre/uv_cache
 
 all:$(TARGET) install install_package run
@@ -13,7 +12,7 @@ install_package:
 run:
 	$(PY_VENV) main.py maps
 
-install:$(TARGET)
+install:
 	@python -m venv $(VENV)
 
 lint:

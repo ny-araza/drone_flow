@@ -112,6 +112,11 @@ class Planner:
 
         while goal_cpt != self.nb_drones:
 
+            print(cpt + 1)
+
+            for drones in connexion_drones.values():
+                drones.clear()
+
             for y in range(len(paths)):
 
                 if cpt + 1 >= len(paths[y]):
@@ -122,10 +127,6 @@ class Planner:
 
                 drone = f"D{y + 1}"
 
-                Utils.get_drone_in_each_turn(
-                    current_zone, next_zone, drone, zone_drones
-                )
-
                 if current_zone == next_zone:
                     continue
 
@@ -133,7 +134,9 @@ class Planner:
                     if next_zone == self.end.name:
                         goal_cpt += 1
 
-                connexion = frozenset((current_zone, next_zone))
+                Utils.get_drone_in_each_turn(
+                    current_zone, next_zone ,drone, zone_drones
+                )
 
                 if next_turn - current_turn != 1:
 
@@ -142,10 +145,9 @@ class Planner:
                         color_rgb[str(self.zones[next_zone].color).upper()],
                     )
 
-                    print("connextion ", self.link_use)
-
-                    if drone not in connexion_drones[connexion]:
-                        connexion_drones[connexion].append(drone)
+                    Utils.get_connnexion_in_each_turn(
+                        current_zone, next_zone, drone, connexion_drones
+                    )
 
                 else:
                     Utils.print_rgb(
@@ -154,13 +156,13 @@ class Planner:
                     )
 
             print()
-            print(f"Turn {cpt + 1}")
-            for name, drones in zone_drones.items():
-                print(f"{name}: {drones}")
+            for conn ,drones in zone_drones.items():
+                print(f"{conn}: {drones}")
             print()
             for conn, drones in connexion_drones.items():
                 print(f"{conn}: {drones}")
             print()
+
             cpt += 1
 
         self.loading = False

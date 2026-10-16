@@ -182,9 +182,7 @@ class Display:
                 self.parse.nb_drones,
             ).check_reachable()
         except PathFindingError:
-            raise Exception("jfskjfdlskf")
-            pg.quit()
-            sys.exit(1)
+            raise Exception("No path found")
 
         start_planning()
 
@@ -257,7 +255,7 @@ class Display:
                 list_drones = [
                     Drone(
                         start_zone.x, start_zone.y,
-                        "./images/drone_50x50.png"
+                        "./drone_50x50.png"
                     )
                     for _ in range(self.parse.nb_drones)
                 ]
