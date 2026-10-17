@@ -1,4 +1,3 @@
-import sys
 import threading
 
 import pygame as pg
@@ -21,6 +20,20 @@ MIN_ZONE_FONT = 10
 
 
 class Display:
+
+    """Represent the graphical representation
+
+        Public Methods:
+            display_window: Diplay the window and 
+            show the simulation
+
+        Attributes:
+            map_path (str): The path to the map file
+            width (int): the width of the window
+            height (int): the height of the window
+            cell_size (int): the size of zone (cell_size*cell_size)
+    """
+
     def __init__(
         self,
         map_path: str,
@@ -44,6 +57,8 @@ class Display:
         self.font = pg.font.Font(None, 24)
 
     def _update_boxes(self) -> None:
+        """Update the size of zone while zooming
+        """
         half = self.cell_size // 2
         for box, zone in zip(self.boxes, self.parse.list_zones):
             box.size = (half, half)
@@ -53,14 +68,25 @@ class Display:
             )
 
     def _zoom(self, step: int) -> None:
+        """increases the box zone size or decreases it, 
+            depending on `step`
+
+            step (int): cell_size increase factor
+        """
         new_size = self.cell_size + step
         if not MIN_CELL <= new_size <= MAX_CELL:
             return
         self.cell_size = new_size
         self._update_boxes()
 
-    def draw_loading(self, angle: int) -> None:
+    def _draw_loading(self, angle: int) -> None:
+        """displays a loading screen while the program 
+            calculates the path for each drone
 
+            angle (int): Angle of the small circle 
+                rotating on the large circle; it increases 
+                with each Pygame loop (from 0 to 360).
+        """
         if self.screen:
             center = (
                 self.screen.get_width() // 2,
@@ -93,6 +119,11 @@ class Display:
             self.screen.blit(text, text_rect)
 
     def _average_turn(self, list_drones: list[Drone]) -> int:
+        """Calculate the average turn for each drone
+        
+            Args:
+                list_drones (list[Drone]): All the drone with metadata
+        """
         total_turn = 0
 
         for drone in list_drones:
@@ -100,7 +131,17 @@ class Display:
 
         return total_turn // len(list_drones)
 
-    def draw_text(self, text: str, color: str, x: int, y: int) -> None:
+    def _draw_text(self, text: str, color: str, x: int, y: int) -> None:
+        """Draw a string in the screen of pygame
+
+            Args: 
+                text (str): The text that show in the screen
+                color (str): The color of the text
+                x (int): the x position to place 
+                the text in the screen
+                y (int): the y position to place 
+                the text in the screen
+        """
         text_drawed = self.font.render(
             text,
             True,
@@ -110,7 +151,9 @@ class Display:
             self.screen.blit(text_drawed, (x, y))
 
     def display_window(self) -> None:
-
+        """Display the pygame window that show the simulation 
+            of each drone to reach the destintation path
+        """
         running = True
         dragging = False
 
@@ -237,7 +280,7 @@ class Display:
 
             self.screen.fill((21, 0, 79))
             if loading:
-                self.draw_loading(angle)
+                self._draw_loading(angle)
 
                 angle = (angle + 5) % 360
 
@@ -325,40 +368,40 @@ class Display:
                 self.screen.blit(label, label_rect)
 
             if display_stats:
-                self.draw_text(
+                self._draw_text(
                     f"Tour : {current_turn}" +
                     (" (terminé)" if finished else ""),
                     "green",
                     10,
                     10,
                 )
-                self.draw_text(
+                self._draw_text(
                     f"Average turn for each "
                     f"drone: {self._average_turn(list_drones)}",
                     "green",
                     10,
                     text_margin + MAX_ZONE_FONT,
                 )
-                self.draw_text(
+                self._draw_text(
                     f"Total path cost: {total_turns * len(list_drones)}",
                     "green",
                     10,
                     text_margin + (MAX_ZONE_FONT * 2),
                 )
-                self.draw_text(
+                self._draw_text(
                     restart_option_label,
                     "white",
                     (self.width - 240),
                     10,
                 )
-                self.draw_text(
+                self._draw_text(
                     zone_name_option_label,
                     "white",
                     (self.width - 240),
                     text_margin + (MAX_ZONE_FONT),
                 )
 
-                self.draw_text(
+                self._draw_text(
                     stats_option_label,
                     "white",
                     (self.width - 240),

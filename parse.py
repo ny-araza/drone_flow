@@ -9,21 +9,38 @@ from zone import ColorType, TypeZone, Zone
 
 
 class Parse:
+    """Represent the parse of the map file.txt
+
+        Public Methods:
+            parse: Parse the map file and 
+            raise an error if map is not valid
+    """
     def __init__(self) -> None:
+        """Constructor of the Parse class
+        """
         self.list_connections: list[Connection] = []
         self.list_zones: list[Zone] = []
         self.nb_drones: int = 0
 
-    def check_unique_zone_name(
+    def _check_unique_zone_name(
                 self, name: str,
                 zones_name: list[str]
             ) -> list[str]:
+        """Check if all zone define in mapefile is unique
+
+            Args:
+                name (str): current zone name
+                zones_name (list[str]): all zone already define before
+            
+            Returns:
+                the new zone list
+        """
         if name in zones_name:
             return []
         zones_name.append(name)
         return zones_name
 
-    def validate_zone(
+    def _validate_zone(
         self,
         line: int,
         name: str,
@@ -32,6 +49,19 @@ class Parse:
         metadata_dict: dict[str, Any],
         map_path: str
     ) -> bool:
+        """Check if the zone define is valid using pydantic
+
+            Args:
+                line (int): the number of line (for error debuging)
+                name (str): The zone name to validate
+                x (str): the x position of the zone in map
+                y (str): the y position of the zone in map
+                metadata_dict (dict[str, Any]): All the metadata zone
+                map_path (str): path of the mapfile (for error debuging)
+        
+            Returns:
+                valid or not valid
+        """
         try:
             max_drones = metadata_dict.get("max_drones", None)
             if max_drones:
@@ -57,7 +87,7 @@ class Parse:
                 raise ParseError(f"{map_path}: Line {line} {error['msg']}")
             return False
 
-    def sotck_zones(
+    def _sotck_zones(
         self,
         line: int,
         key: str,
@@ -70,6 +100,21 @@ class Parse:
         width: int,
         height: int
     ) -> None:
+        """Stock the zone found into a list of zone
+
+            Args:
+                key (str): key that check if value is zone or connexion
+                basedata (list[str]): name, posx, posy (zone data)
+                metadata_dict (dict[str, Any]): the metadata for the current zone
+                exists_name (list[str]): all the zone name already defined before
+                coords (list[tuple[str, str]]): all the coord already defined before
+                coords_set (set[tuple[str, str]]): Use to check is other coords 
+                is overlapping another coords
+                map_path (str): the path of the map
+                line (int): the cuurent line
+                width (int): the width of the window
+                height (int): the height of the window
+        """
         name, x, y = basedata
 
         if not (
@@ -93,8 +138,8 @@ class Parse:
                 f"The {(int(x), int(y))} {name} point is "
                 "overlap with another zone point"
             )
-        if self.check_unique_zone_name(name, exists_name):
-            if self.validate_zone(line, name, x, y, metadata_dict, map_path):
+        if self._check_unique_zone_name(name, exists_name):
+            if self._validate_zone(line, name, x, y, metadata_dict, map_path):
                 if key == "start_hub":
                     self.list_zones.append(
                         Zone(
@@ -148,7 +193,15 @@ class Parse:
                 f"{map_path}: Line: {line}{name} is not an unique zone name"
             )
 
-    def check_key_metadata(self, keys: list[str]) -> bool:
+    def _check_key_metadata(self, keys: list[str]) -> bool:
+        """Check if all key in metadata is valid
+
+            Args:
+                keys (list[str]): list of keys in a metadata for current zone
+            
+            Returns:
+                bool
+        """
         all_key_metadata: list[str] = ["zone", "color", "max_drones"]
         for key in keys:
             if key not in all_key_metadata:
@@ -156,6 +209,15 @@ class Parse:
         return True
 
     def parse(self, data: str, map_path: str, width: int, height: int) -> None:
+        """Main parse, get the map path, stock all 
+            zone valid and connexion valid in a list
+
+            Args:
+                data (str): The mapfile file read
+                map_path (str): the path of the map
+                width (int): width of the pygame window
+                height (int): height of the pygame window
+        """
         if not ("start_hub" in data and "end_hub" in data):
             raise ParseError(
                 f"{map_path}: map file must contain 'start_hub' and 'end_hub'"
@@ -267,7 +329,7 @@ class Parse:
                             )
                         metadata_dict.update({meta_key: meta_value})
 
-                    if not self.check_key_metadata(list(metadata_dict.keys())):
+                    if not self._check_key_metadata(list(metadata_dict.keys())):
                         raise ParseError(
                             f"{map_path}: "
                             f"Line {line} "
@@ -275,7 +337,7 @@ class Parse:
                             "'zone', 'color' or 'max_drones'"
                         )
 
-                    self.sotck_zones(
+                    self._sotck_zones(
                         line,
                         key,
                         basedata,

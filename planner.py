@@ -14,12 +14,28 @@ Action = tuple[float, float] | None
 
 
 class Planner:
+    """represents the organization of each drone's path
+
+        Attributes:
+            zones (list[Zone]): all the zones stored in a list
+            connections (list[Connection]): All the connection 
+                sotred in a list
+            nb_drones (int): number of drone
+    """
     def __init__(
         self,
         zones: list[Zone],
         connections: list[Connection],
         nb_drones: int,
     ) -> None:
+        """Constructor of the Planner class
+
+            Args:
+                zones (list[Zone]): all the zones stored in a list
+                connections (list[Connection]): All the connection 
+                    sotred in a list
+                nb_drones (int): number of drone
+        """
         self.zones: dict[str, Zone] = {z.name: z for z in zones}
         self.start: Zone | None = next((z for z in zones if z.is_start), None)
         self.end: Zone | None = next((z for z in zones if z.is_end), None)
@@ -47,26 +63,59 @@ class Planner:
         self.timeline: dict[int, list[tuple[str, str]]]
 
     def check_reachable(self) -> None:
+        """Check if the path for one drone is not None
+        """
         if self._find_path() is None:
             raise PathFindingError("No path from start to end")
 
     def get_loading(self) -> bool:
+        """Getter for loading
+
+            Returns:
+                loading
+        """
         return self.loading
 
     def set_loading(self, loading: bool) -> None:
+        """Setter for loading
+
+            Args:
+                loading (bool): Use to check if the process is done
+        """
         self.loading = loading
 
     @staticmethod
     def _type(zone: Zone) -> str:
+        """Get the zone type
+
+            Args:
+                zone (Zone): The zone to get his type
+            
+            Returns:
+                str
+        """
         return str(getattr(zone, "type", zone)).lower()
 
     @staticmethod
     def _capacity(zone: Zone) -> float:
+        """Get the capcaity of a zone
+
+            Args:
+                zone (Zone): The zone that get this capacity
+            
+            Returns:
+                float
+        """
         if zone.is_start or zone.is_end:
             return INF
         return zone.max_drones
 
     def plan_all(self) -> list[list[Action]]:
+        """Get all the path for each drone and store it to a list
+
+            Returns:
+                list[list[Action]]
+        """
 
         plans: list[list[Action]] = []
 
@@ -145,6 +194,11 @@ class Planner:
         return plans
 
     def _find_path(self) -> list[tuple[str, int]] | None:
+        """Get the path for one drone (Dijkstra's algo)
+
+            Returns:
+                list[tuple[str, int]]
+        """
         if self.start is None or self.end is None:
             return None
 
@@ -210,12 +264,29 @@ class Planner:
                 parent: dict[tuple[str, int], tuple[str, int] | None],
                 heap: list[tuple[int, int, str]]
             ) -> None:
+        """Push the possible move to the heap list
+
+            Args:
+                cur (tuple[str, int]): The current pos of the drone (current zone)
+                nxt (tuple[str, int]): The target pos of the drone (target zone)
+                pen (int): The priority of one zone 
+                dist (dict[tuple[str, int], int]): All the dist reach by the drone
+                parent (dict[tuple[str, int], tuple[str, int] | None]): 
+                    The path from start to end
+                heap (list[tuple[int, int, str]]): The heap list that store 
+                    all the possibility move for a drone
+        """
         if pen < dist.get(nxt, INF):
             dist[nxt] = pen
             parent[nxt] = cur
             heapq.heappush(heap, (nxt[1], pen, nxt[0]))
 
     def _reserve(self, path: list[tuple[str, int]]) -> None:
+        """Reserve the drone path and store it to a dict
+
+            Args:
+                path (list[tuple[str, int]]): the drones path
+        """
         for name, t in path:
             if self._capacity(self.zones[name]) != INF:
                 self.zone_use[(name, t)] = self.zone_use.get((name, t), 0) + 1
@@ -229,6 +300,14 @@ class Planner:
                     (key, ta + k), 0) + 1
 
     def _to_actions(self, path: list[tuple[str, int]]) -> list[Action]:
+        """Convert the drone's path to a valid pos in the screen
+
+            Args:
+                path (list[tuple[str, int]]): The drone's path
+            
+            Returns:
+                list[Action]
+        """
         actions: list[Action] = []
         for (a, ta), (b, tb) in zip(path, path[1:]):
             if a == b:
