@@ -41,6 +41,14 @@ class Display:
         height: int = 960,
         cell_size: int = 60,
     ):
+        """Constructor of the Display class
+
+            Args:
+                map_path (str): The path to the map file
+                width (int): the width of the window
+                height (int): the height of the window
+                cell_size (int): the size of zone (cell_size*cell_size)
+        """
         self.parse: Parse = Parse()
         temp_data = Utils.read_file(map_path)
         self.parse.parse(temp_data, map_path, width, height)
