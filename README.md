@@ -1,77 +1,119 @@
-# Fly-In: Drone Simulation Challenge Maps
+*This project has been created as part of the 42 curriculum by ny-araza*
 
-This collection contains carefully crafted maps designed to test different aspects of drone pathfinding algorithms, from basic navigation to complex optimization challenges.
+# DESCRIPTION
 
-## Map Categories
+The "fly-in" project involves simulating drones to find the shortest path from point A to point B. The graph is weighted, A default zone costs 1 to travel to from a given point, whereas a restricted zone costs 2. Regarding connections, a connection may limit the number of drones passing through it.
 
-### 🟢 Easy Maps
-**Target**: Beginners, basic algorithm testing
-- `01_linear_path.txt` - Simple linear progression (2 drones)
-- `02_simple_fork.txt` - Basic path splitting (4 drones)  
-- `03_basic_capacity.txt` - Introduction to capacity constraints (4 drones)
+### Algorithm choices and implementation strategy
+Here, a weighted graph is used, so Dijkstra's algorithm is more suitable.
+For the implementation, I used objects to store connections, drones, and zones, in order to better manage them and adhere to the problem's constraints during pathfinding.
 
-### 🟡 Medium Maps
-**Target**: Intermediate challenges, algorithm optimization
-- `01_dead_end_trap.txt` - Dead ends that can trap naive algorithms (5 drones)
-- `02_circular_loop.txt` - Circular paths with restricted zones (6 drones)
-- `03_priority_puzzle.txt` - Optimal path selection with priority zones (5 drones)
+For the graphical display, I used Pygame.
 
-### 🔴 Hard Maps
-**Target**: Advanced algorithms, stress testing
-- `01_maze_nightmare.txt` - Complex maze with multiple traps and loops (8 drones)
-- `02_capacity_hell.txt` - Extreme capacity constraints requiring careful timing (12 drones)
-- `03_ultimate_challenge.txt` - **THE ULTIMATE TEST** - All challenges combined (15 drones)
+**Dijkstra's algorithm:**
 
-### ⚫ Challenger Maps
-**Target**: Research and algorithmic limits exploration
-- `01_the_impossible_dream.txt` - **THE IMPOSSIBLE DREAM** - Quasi-unsolvable challenge (25 drones)
+I have stored the possible movements of a drone in an array on the heap. Like this **heap: list[tuple[int, int, str]]**. For the first value its the turn count, the second either 1 or 0, 0 if it has priority, and 1 otherwise and the last is the name of the destination zone.
 
-> ⚠️ **WARNING**: Challenger maps are designed to push algorithmic limits and may not be solvable by most implementations. They are intended for research, stress testing, and algorithmic exploration rather than validation. The goal is to challenge the boundaries of what's possible, not to pass evaluation criteria.
+A heap list rearranges the list by always placing the smallest element at the top (as the first element).
 
-> 🏆 **CHALLENGE RECORD**: The reference implementation solves "The Impossible Dream" in **45 turns**. Can you beat this record? This serves as a benchmark for algorithmic optimization and provides a concrete goal for advanced implementations.
+For zone-type management, I store the number of drones during a given turn *t* in a dictionary, and I do the same for the connection.
 
-## Challenge Types Covered
+To construct a drone's path, I store each movement in a dictionary, using the current zone as the key and the destination as the value.
 
-### 🎯 **Dead End Traps**
-Maps contain paths that lead nowhere, testing if algorithms can backtrack or avoid getting stuck.
+### Visual representation features
 
-### 🔄 **Circular Loops** 
-Cycles in the graph that can cause infinite loops in poorly designed algorithms.
+For the graphical representation, I have included the number of turn per drone,
+the minimum number of turn across all drones,
+and the total number of turn required for all drones to reach their destination.
+The user can also display and hide the zone's name and drone's name.
 
-### ⚡ **Capacity Constraints**
-- Zone capacity limits (max_drones)
-- Connection capacity limits (max_link_capacity)
-- Timing-based bottlenecks
+The user can zoom and move the map. This ensures the map is displayed properly when it fills the entire screen.
+It also ensures that drone names are displayed correctly, even when zones are too close together and the names would otherwise overlap.
 
-### 🚀 **Zone Type Optimization**
-- `normal`: Standard 1-turn movement
-- `restricted`: 2-turn movement (slow but sometimes necessary)
-- `priority`: 1-turn movement but should be preferred
-- `blocked`: Completely inaccessible
+### Example program's functionnality
 
-### 🧩 **Complex Topology**
-- Multiple valid paths with different costs
-- Convergence points requiring coordination
-- Multi-layer challenges
+#### Input
+This is a map file example input.txt
+```txt
+nb_drones: 1
+start_hub: start 0 0 [color=green max_drones=2]
+hub: waypoint1 1 0 [color=blue zone=blocked]
+hub: waypoint2 2 0 [color=yellow zone=priority]
+end_hub: goal 3 0 [color=red]
 
-## Testing Strategy
+connection: start-waypoint1
+connection: waypoint2-start
+connection: waypoint1-waypoint2
+connection: waypoint2-goal
+```
 
-1. **Start with Easy**: Ensure basic functionality works
-2. **Progress to Medium**: Test algorithm robustness
-3. **Challenge with Hard**: Stress test optimization and edge cases
-4. **Ultimate Test**: `03_ultimate_challenge.txt` combines all difficulties
+##### parsing:
+The coordinates are limited by the size of the window.
+To avoid excessively long wait times, the total number of allowed drones is limited at 100.
 
-## Expected Behavior
+#### Output
+This is an expected output shows in the terminal
+```bash
+D1-waypoint2 
+D1-goal 
+```
+At t1, the drone moves toward waypoint 1.
+At t2, it moves toward the goal.
 
-All maps are designed to be solvable with a well-implemented algorithm. However:
+# INSTRUCTION
 
-- **Easy maps**: Should solve quickly with any reasonable approach
-- **Medium maps**: May require backtracking, path optimization, or capacity management
-- **Hard maps**: Demand sophisticated algorithms with proper conflict resolution and optimization
+```bash
+    make
+    # install the project dependencies then run it
+```
 
-## Performance Benchmarks
+```bash
+    make install
+    # Install the project dependencies
+```
 
-- **Easy**: < 10 simulation turns typically
-- **Medium**: 10-30 simulation turns depending on optimization
-- **Hard**: 30+ simulation turns, focus on finding valid solutions
-- **Challenger**: **Record to beat: 45 turns** for "The Impossible Dream" - designed for algorithmic research
+```bash
+    make run
+    # run the program
+```
+
+```bash
+    make lint
+    # Check the mypy and the flake8
+```
+
+```bash
+    make lint-strict
+    # Check the mypy in strict-mode
+```
+
+```bash
+    make clean
+    # delete all __pycache__ folder
+```
+
+```bash
+    make fclean
+    # Reset all dependencies
+```
+
+# RESSOURCES
+
+### Articles and tutorials
+<ul>
+    <li>
+        <a href="https://www.pygame.org/docs/">Learn pygame</a>
+    </li>
+    <li>
+        <a href="https://en.wikipedia.org/wiki/Dijkstra's_algorithm">Dijkstra's algorithm</a>
+    </li>
+    <li>
+        <a href="https://coddy.tech/visualize/graphs/dijkstras-algorithm">Dijkstra vizualisation</a>
+    </li>
+</ul>
+
+### AI using
+<ul>
+    <li>Help me for the comprehension of dijkstra's algorithm</li>
+    <li>Help me for debuging pygame</li>
+</ul>

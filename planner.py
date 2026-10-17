@@ -93,9 +93,19 @@ class Planner:
             self.loading = False
             raise PathFindingError("Ar error occured")
 
+        connexion_drones = {frozenset(
+                (conn.zone1.name, conn.zone2.name)
+            ): [] for conn in self.connections}
+
+        zone_drones = {name: [] for name, _ in self.zones.items()}
+
+        for i in range(self.nb_drones):
+            zone_drones[self.start.name].append(f"D{i + 1}")
+
         while goal_cpt != self.nb_drones:
 
-            print(cpt + 1)
+            for drones in connexion_drones.values():
+                drones.clear()
 
             for y in range(len(paths)):
 
@@ -128,7 +138,6 @@ class Planner:
                     )
 
             print()
-
             cpt += 1
 
         self.loading = False
