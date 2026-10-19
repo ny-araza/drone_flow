@@ -231,6 +231,7 @@ class Parse:
         coords: list[tuple[str, str]] = []
         coords_set: set[tuple[str, str]] = set()
         is_nb_drones: bool = False
+        exist_conn: set[frozenset[str]] = set()
 
         for tmp in temp:
             line = temp.index(tmp) + 1
@@ -524,5 +525,18 @@ class Parse:
                     connection: Connection = Connection(
                             zone1, zone2, temp_metadata
                         )
-
+                    if frozenset(
+                        (connection.zone1.name, 
+                         connection.zone2.name)
+                        ) not in exist_conn:
+                        exist_conn.add(
+                            frozenset(
+                                (connection.zone1.name, 
+                                 connection.zone2.name)
+                            ))
+                    else:
+                        raise ParseError(
+                            f"Connection ({connection.zone1.name}, "
+                            f"{connection.zone2.name}) is already declared"
+                        )
                     self.list_connections.append(connection)
