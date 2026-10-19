@@ -4,7 +4,7 @@ nb_drones: 2
 
 start_hub: start 0 0 [color=gre max_drones=1]
 hub: waypoint1 1 1 [color=blue max_drones=2]
-hub: waypoint2 2 0 [color=yellow zone=priority max_drones=2]
+hub: waypoint2 2 0 [color=yellosfsdfw zone=priority max_drones=2]
 end_hub: goal 3 0 [color=red]
 
 connection: start-waypoint1 [max_link_capacity=2]

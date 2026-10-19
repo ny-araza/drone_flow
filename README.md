@@ -27,6 +27,7 @@ With:
     <li>n: number of drone</li>
     <li>T: number total of possible turn to reach the endzone</li>
     <li>d: number of neighbors in a zone</li>
+    <li>heappush/heappop: O(Log(n T d))</li>
 </ul>
 
 ### Visual representation features

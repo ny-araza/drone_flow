@@ -144,11 +144,14 @@ class Parse:
                 "overlap with another zone point"
             )
         if self._check_unique_zone_name(name, exists_name):
+            color = metadata_dict.get("color", "white")
+
+            key_color = [c.lower() for c in color_rgb.keys()]
+            if color not in key_color:
+                color = "white"
             if self._validate_zone(line, name, x, y, metadata_dict, map_path):
                 if key == "start_hub":
-                    color = metadata_dict.get("color", "black")
-                    if color not in color_rgb.keys():
-                        color = "black"
+
                     self.list_zones.append(
                         Zone(
                             name,
@@ -171,7 +174,7 @@ class Parse:
                             is_start=False,
                             is_end=True,
                             max_drones=metadata_dict.get("max_drones", 1),
-                            color=metadata_dict.get("color", "black"),
+                            color=color,
                             type=metadata_dict.get("zone", "normal"),
                             image="./images/end_hub_50x50.png",
                         )
@@ -185,7 +188,7 @@ class Parse:
                             is_start=False,
                             is_end=False,
                             max_drones=metadata_dict.get("max_drones", 1),
-                            color=metadata_dict.get("color", "black"),
+                            color=color,
                             type=metadata_dict.get("zone", "normal"),
                         )
                     )
