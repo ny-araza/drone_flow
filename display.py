@@ -57,8 +57,8 @@ class Display:
         self.cell_size = cell_size
         self.list_rect: list[pg.Rect] = []
         self.boxes: list[pg.Rect] = []
-        self.offset_x = 0
-        self.offset_y = 0
+        self.offset_x = self.width // 2 - ((len(self.parse.list_zones) * cell_size) // 6)
+        self.offset_y = self.height // 2
         pg.init()
         self.screen: pg.Surface | None = None
         self.clock = pg.time.Clock()
