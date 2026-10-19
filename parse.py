@@ -239,7 +239,6 @@ class Parse:
                 hash_temp = tmp.split("#")
                 item = tmp.split(":")
                 item = hash_temp[0].strip().split(":")
-                print(item)
                 if len(item) != 2:
                     raise ParseError(
                         f"{map_path}: "
@@ -328,7 +327,6 @@ class Parse:
 
                     if len(brackets_test) > 1:
                         temp_temp_value = temp_value[1].split(" ")
-
                     metadata_dict: dict[str, Any] = {}
 
                     if not temp_temp_value:
@@ -337,6 +335,7 @@ class Parse:
                         new_temp = meta_val.strip("[]")
                         if new_temp:
                             zone_metadata.append(str(new_temp))
+                    exist_met_key: set[str] = set()
                     for temp_item in zone_metadata:
                         if "=" not in temp_item:
                             raise ParseError(
@@ -352,6 +351,16 @@ class Parse:
                                 f"Line {line} Metadata must "
                                 "be [meta_data=value]"
                             )
+
+                        if meta_key not in exist_met_key:
+                            exist_met_key.add(meta_key)
+                        else:
+                            raise ParseError(
+                                f"{map_path}: "
+                                f"Line {line} "
+                                "Metadata key must be unique"    
+                            )
+
                         metadata_dict.update({meta_key: meta_value})
 
                     if not self._check_key_metadata(list(metadata_dict.keys())):
@@ -537,6 +546,7 @@ class Parse:
                     else:
                         raise ParseError(
                             f"Connection ({connection.zone1.name}, "
-                            f"{connection.zone2.name}) is already declared"
+                            f"{connection.zone2.name}) "
+                            "is already declared"
                         )
                     self.list_connections.append(connection)
