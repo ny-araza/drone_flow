@@ -10,10 +10,10 @@ install_package:
 	@$(PY_VENV) -m pip install -r requirements.txt
 
 run:
-	$(PY_VENV) main.py $(ARGS)
+	@$(PY_VENV) main.py $(ARGS)
 
 run-folder:
-	$(PY_VENV) main.py --folder $(ARGS)
+	@$(PY_VENV) main.py --folder $(ARGS)
 
 install:
 	@python -m venv $(VENV)

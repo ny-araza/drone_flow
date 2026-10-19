@@ -1,5 +1,5 @@
-import os
 import sys
+from pathlib import Path
 
 from display import Display
 from error import ParseError
@@ -17,6 +17,11 @@ if __name__ == "__main__":
                 raise ParseError(
                     "Flag --folder must be python " \
                     "main.py --folder <map_folder>"
+                )
+            path = Path(flag[1])
+            if not path.is_dir():
+                raise ParseError(
+                    f"{flag[1]} is not a folder"
                 )
             input: Input = Input(flag[1])
             input.choose_level()

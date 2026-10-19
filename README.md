@@ -20,6 +20,15 @@ For zone-type management, I store the number of drones during a given turn *t* i
 
 To construct a drone's path, I store each movement in a dictionary, using the current zone as the key and the destination as the value.
 
+### Complexity of the algorithm
+My algo have a *O( n T d C Log ( n T d ) )* <br>
+With:
+<ul>
+    <li>n: number of drone</li>
+    <li>T: number total of possible turn to reach the endzone</li>
+    <li>d: number of neighbors in a zone</li>
+</ul>
+
 ### Visual representation features
 
 For the graphical representation, I have included the number of turn per drone,
@@ -74,7 +83,12 @@ At t2, it moves toward the goal.
 
 ```bash
     make run
-    # run the program
+    # run the program with the default map (01_linear_path.txt)
+```
+
+```bash
+    make run-folder ARGS=maps # the folder maps
+    # run the program with the maps folder
 ```
 
 ```bash
