@@ -1,6 +1,7 @@
 import threading
 
 import pygame as pg
+import math
 
 from drones import Drone
 from error import PathFindingError
@@ -57,7 +58,8 @@ class Display:
         self.cell_size = cell_size
         self.list_rect: list[pg.Rect] = []
         self.boxes: list[pg.Rect] = []
-        self.offset_x = self.width // 2 - ((len(self.parse.list_zones) * cell_size) // 6)
+        self.offset_x = self.width // 2 - \
+            ((len(self.parse.list_zones) * cell_size) // 6)
         self.offset_y = self.height // 2
         pg.init()
         self.screen: pg.Surface | None = None
@@ -105,8 +107,6 @@ class Display:
 
         if self.screen:
             pg.draw.circle(self.screen, (80, 80, 80), center, radius, 5)
-
-        import math
 
         rad = math.radians(angle)
         x = center[0] + int(math.cos(rad) * radius)
@@ -294,7 +294,6 @@ class Display:
 
                 pg.display.flip()
                 dt = self.clock.tick(FPS) / 1000
-
                 continue
 
             total_turns = max(

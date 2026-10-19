@@ -7,22 +7,31 @@ from input import Input
 
 if __name__ == "__main__":
     try:
-        if not sys.argv[1:] or not os.path.isdir(sys.argv[1:][0]):
-            raise ParseError("'maps' folder does not exist")
-
-        flag = sys.argv[2:]
-
-        print(flag)
+        flag = sys.argv[1:]
 
         height = 960
         width = 1280
 
-        input: Input = Input(sys.argv[1:][0])
-        input.choose_level()
-        input.select_map_path()
+        if "--folder" in flag:
+            if len(flag) != 2:
+                raise ParseError(
+                    "Flag --folder must be python " \
+                    "main.py --folder <map_folder>"
+                )
+            input: Input = Input(flag[1])
+            input.choose_level()
+            input.select_map_path()    
+            display: Display = Display(input.map_path, width, height)
+            display.display_window()
+        else:
+            if len(flag) != 1:
+                raise ParseError(
+                    "To run this program: " \
+                    "python main.py <file_path>"
+                )
+            display: Display = Display(flag[0], width, height)
+            display.display_window()
 
-        display: Display = Display(input.map_path, width, height)
-        display.display_window()
     except KeyboardInterrupt:
         print("\nPlease be patient!!")
     except Exception as e:
