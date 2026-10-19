@@ -1,9 +1,4 @@
 import threading
-import os
-
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-
-import pygame as pg
 import math
 
 from drones import Drone
@@ -14,6 +9,8 @@ from zone import Zone
 from color import color_rgb
 from parse import Parse
 from utils import Utils
+
+import pygame as pg
 
 MIN_CELL = 50
 MAX_CELL = 200
@@ -28,7 +25,7 @@ class Display:
     """Represent the graphical representation
 
         Public Methods:
-            display_window: Diplay the window and 
+            display_window: Diplay the window and
             show the simulation
 
         Attributes:
@@ -81,7 +78,7 @@ class Display:
             )
 
     def _zoom(self, step: int) -> None:
-        """increases the box zone size or decreases it, 
+        """increases the box zone size or decreases it,
             depending on `step`
 
             step (int): cell_size increase factor
@@ -93,11 +90,11 @@ class Display:
         self._update_boxes()
 
     def _draw_loading(self, angle: int) -> None:
-        """displays a loading screen while the program 
+        """displays a loading screen while the program
             calculates the path for each drone
 
-            angle (int): Angle of the small circle 
-                rotating on the large circle; it increases 
+            angle (int): Angle of the small circle
+                rotating on the large circle; it increases
                 with each Pygame loop (from 0 to 360).
         """
         if self.screen:
@@ -131,7 +128,7 @@ class Display:
 
     def _average_turn(self, list_drones: list[Drone]) -> int:
         """Calculate the average turn for each drone
-        
+
             Args:
                 list_drones (list[Drone]): All the drone with metadata
         """
@@ -145,12 +142,12 @@ class Display:
     def _draw_text(self, text: str, color: str, x: int, y: int) -> None:
         """Draw a string in the screen of pygame
 
-            Args: 
+            Args:
                 text (str): The text that show in the screen
                 color (str): The color of the text
-                x (int): the x position to place 
+                x (int): the x position to place
                 the text in the screen
-                y (int): the y position to place 
+                y (int): the y position to place
                 the text in the screen
         """
         text_drawed = self.font.render(
@@ -162,7 +159,7 @@ class Display:
             self.screen.blit(text_drawed, (x, y))
 
     def display_window(self) -> None:
-        """Display the pygame window that show the simulation 
+        """Display the pygame window that show the simulation
             of each drone to reach the destintation path
         """
         running = True

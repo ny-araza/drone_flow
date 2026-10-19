@@ -18,7 +18,7 @@ class Planner:
 
         Attributes:
             zones (list[Zone]): all the zones stored in a list
-            connections (list[Connection]): All the connection 
+            connections (list[Connection]): All the connection
                 sotred in a list
             nb_drones (int): number of drone
     """
@@ -32,7 +32,7 @@ class Planner:
 
             Args:
                 zones (list[Zone]): all the zones stored in a list
-                connections (list[Connection]): All the connection 
+                connections (list[Connection]): All the connection
                     sotred in a list
                 nb_drones (int): number of drone
         """
@@ -90,7 +90,7 @@ class Planner:
 
             Args:
                 zone (Zone): The zone to get his type
-            
+
             Returns:
                 str
         """
@@ -102,7 +102,7 @@ class Planner:
 
             Args:
                 zone (Zone): The zone that get this capacity
-            
+
             Returns:
                 float
         """
@@ -142,14 +142,16 @@ class Planner:
             self.loading = False
             raise PathFindingError("Ar error occured")
 
-        connexion_drones = {frozenset(
+        connexion_drones: dict[frozenset[str], list[str]] = {frozenset(
                 (conn.zone1.name, conn.zone2.name)
             ): [] for conn in self.connections}
 
-        zone_drones = {name: [] for name, _ in self.zones.items()}
+        zone_drones: dict[str, list[str]] = {
+            name: [] for name, _ in self.zones.items()}
 
         for i in range(self.nb_drones):
-            zone_drones[self.start.name].append(f"D{i + 1}")
+            if self.start:
+                zone_drones[self.start.name].append(f"D{i + 1}")
 
         while goal_cpt != self.nb_drones:
 
@@ -163,8 +165,6 @@ class Planner:
 
                 current_zone, current_turn = paths[y][cpt]
                 next_zone, next_turn = paths[y][cpt + 1]
-
-                drone = f"D{y + 1}"
 
                 if current_zone == next_zone:
                     continue
@@ -267,13 +267,16 @@ class Planner:
         """Push the possible move to the heap list
 
             Args:
-                cur (tuple[str, int]): The current pos of the drone (current zone)
-                nxt (tuple[str, int]): The target pos of the drone (target zone)
-                pen (int): The priority of one zone 
-                dist (dict[tuple[str, int], int]): All the dist reach by the drone
-                parent (dict[tuple[str, int], tuple[str, int] | None]): 
+                cur (tuple[str, int]): The current pos of
+                  the drone (current zone)
+                nxt (tuple[str, int]): The target pos
+                  of the drone (target zone)
+                pen (int): The priority of one zone
+                dist (dict[tuple[str, int], int]): All
+                  the dist reach by the drone
+                parent (dict[tuple[str, int], tuple[str, int] | None]):
                     The path from start to end
-                heap (list[tuple[int, int, str]]): The heap list that store 
+                heap (list[tuple[int, int, str]]): The heap list that store
                     all the possibility move for a drone
         """
         if pen < dist.get(nxt, INF):
@@ -304,7 +307,7 @@ class Planner:
 
             Args:
                 path (list[tuple[str, int]]): The drone's path
-            
+
             Returns:
                 list[Action]
         """

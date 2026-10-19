@@ -34,7 +34,7 @@ class Drone:
                 target_x (float): x position of target in pygame screen
                 target_y (float): y position of target in pygame screen
                 dt (float): time elapsed
-            
+
             Returns:
                 bool
         """
@@ -64,7 +64,7 @@ class Drone:
                 offset_x (int): Use if the user move the entire map
                     . Its a represent the mouse x pos
                 offset_x (int): its represents the y pos mouse.
-            
+
             Returns:
                 tuple[int, int]
         """

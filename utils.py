@@ -7,7 +7,7 @@ class Utils:
 
             Args:
                 file_path (str): the file map path
-            
+
             Returns:
                 str
         """
@@ -40,7 +40,7 @@ class Utils:
                 current_zone (str): the current zone that the drone is
                 next_zone (str): the target of the drone
                 drone (str): the ID of the drone
-                zone_drones (dict[str, list[str]]): list of the drone 
+                zone_drones (dict[str, list[str]]): list of the drone
                     in zone in each turn
         """
         if current_zone != next_zone:
@@ -50,7 +50,6 @@ class Utils:
             if drone not in zone_drones[next_zone]:
                 zone_drones[next_zone].append(drone)
 
-
     @staticmethod
     def get_connnexion_in_each_turn(
         current_zone: str,
@@ -58,18 +57,17 @@ class Utils:
         drone: str,
         connexion_drones: dict[frozenset[str], list[str]]
     ) -> None:
-        """Display the drone information in each 
+        """Display the drone information in each
             turn for connection
-        
+
             Args:
                 current_zone (str): the current zone that the drone is
                 next_zone (str): the target of the drone
                 drone (str): the ID of the drone
-                connexion_drones (dict[str, list[str]]): list of the drone 
+                connexion_drones (dict[str, list[str]]): list of the drone
                     in connection in each turn
         """
         connexion = frozenset((current_zone, next_zone))
         if connexion in connexion_drones:
             if drone not in connexion_drones[connexion]:
                 connexion_drones[connexion].append(drone)
-

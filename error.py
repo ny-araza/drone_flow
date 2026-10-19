@@ -7,9 +7,10 @@ class ParseError(Exception):
     def __init__(self, message: str = "") -> None:
         pass
 
+
 class PathFindingError(Exception):
     """Represent the pathfinding error
-    
+
         Attributes:
             message (str): The error message
     """

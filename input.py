@@ -59,7 +59,7 @@ class Input:
             Args:
                 user_choice (str): The input from the user
                 sub_folder (str): The subfolder list
-            
+
             Returns:
                 the user_choice (int)
         """

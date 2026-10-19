@@ -1,8 +1,7 @@
 from pydantic import BaseModel, Field, \
-        model_validator, field_validator
+        model_validator
 from zone import TypeZone
 from typing_extensions import Self
-from color import color_rgb
 
 
 class ZoneValidation(BaseModel):
@@ -16,8 +15,8 @@ class ZoneValidation(BaseModel):
             is_end (bool): is a end hub
             type (TypeZone): type of a zone
             color (ColorType): color of a zone
-            max_drones (int): maximum of drone that can 
-                be in this zone        
+            max_drones (int): maximum of drone that can
+                be in this zone
     """
     name: str = Field(...)
     x: int = Field(...)

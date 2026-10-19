@@ -8,11 +8,12 @@ from validation import ZoneValidation
 from zone import ColorType, TypeZone, Zone
 from color import color_rgb
 
+
 class Parse:
     """Represent the parse of the map file.txt
 
         Public Methods:
-            parse: Parse the map file and 
+            parse: Parse the map file and
             raise an error if map is not valid
     """
     def __init__(self) -> None:
@@ -31,7 +32,7 @@ class Parse:
             Args:
                 name (str): current zone name
                 zones_name (list[str]): all zone already define before
-            
+
             Returns:
                 the new zone list
         """
@@ -58,7 +59,7 @@ class Parse:
                 y (str): the y position of the zone in map
                 metadata_dict (dict[str, Any]): All the metadata zone
                 map_path (str): path of the mapfile (for error debuging)
-        
+
             Returns:
                 valid or not valid
         """
@@ -105,10 +106,14 @@ class Parse:
             Args:
                 key (str): key that check if value is zone or connexion
                 basedata (list[str]): name, posx, posy (zone data)
-                metadata_dict (dict[str, Any]): the metadata for the current zone
-                exists_name (list[str]): all the zone name already defined before
-                coords (list[tuple[str, str]]): all the coord already defined before
-                coords_set (set[tuple[str, str]]): Use to check is other coords 
+                metadata_dict (dict[str, Any]): the metadata
+                for the current zone
+                exists_name (list[str]): all the zone name already
+                defined before
+                coords (list[tuple[str, str]]): all the
+                coord already defined before
+                coords_set (set[tuple[str, str]]): Use to check is
+                other coords
                 is overlapping another coords
                 map_path (str): the path of the map
                 line (int): the cuurent line
@@ -201,7 +206,7 @@ class Parse:
 
             Args:
                 keys (list[str]): list of keys in a metadata for current zone
-            
+
             Returns:
                 bool
         """
@@ -212,7 +217,7 @@ class Parse:
         return True
 
     def parse(self, data: str, map_path: str, width: int, height: int) -> None:
-        """Main parse, get the map path, stock all 
+        """Main parse, get the map path, stock all
             zone valid and connexion valid in a list
 
             Args:
@@ -262,7 +267,8 @@ class Parse:
                     except ValueError:
                         raise ParseError(
                             f"{map_path}: "
-                            f"Line {line}, 'nb_drones' must be int and positive"
+                            f"Line {line}, 'nb_drones' must be int"
+                            " and positive"
                         )
                 basedata: list[str] = []
                 if is_nb_drones and key == "nb_drones":
@@ -358,12 +364,14 @@ class Parse:
                             raise ParseError(
                                 f"{map_path}: "
                                 f"Line {line} "
-                                "Metadata key must be unique"    
+                                "Metadata key must be unique"
                             )
 
                         metadata_dict.update({meta_key: meta_value})
 
-                    if not self._check_key_metadata(list(metadata_dict.keys())):
+                    if not self._check_key_metadata(
+                        list(metadata_dict.keys())
+                    ):
                         raise ParseError(
                             f"{map_path}: "
                             f"Line {line} "
@@ -535,12 +543,12 @@ class Parse:
                             zone1, zone2, temp_metadata
                         )
                     if frozenset(
-                        (connection.zone1.name, 
+                        (connection.zone1.name,
                          connection.zone2.name)
-                        ) not in exist_conn:
+                    ) not in exist_conn:
                         exist_conn.add(
                             frozenset(
-                                (connection.zone1.name, 
+                                (connection.zone1.name,
                                  connection.zone2.name)
                             ))
                     else:

@@ -15,7 +15,7 @@ if __name__ == "__main__":
         if "--folder" in flag:
             if len(flag) != 2:
                 raise ParseError(
-                    "Flag --folder must be python " \
+                    "Flag --folder must be python "
                     "main.py --folder <map_folder>"
                 )
             path = Path(flag[1])
@@ -25,16 +25,16 @@ if __name__ == "__main__":
                 )
             input: Input = Input(flag[1])
             input.choose_level()
-            input.select_map_path()    
+            input.select_map_path()
             display: Display = Display(input.map_path, width, height)
             display.display_window()
         else:
             if len(flag) != 1:
                 raise ParseError(
-                    "To run this program: " \
+                    "To run this program: "
                     "python main.py <file_path>"
                 )
-            display: Display = Display(flag[0], width, height)
+            display = Display(flag[0], width, height)
             display.display_window()
 
     except KeyboardInterrupt:

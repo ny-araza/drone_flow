@@ -8,7 +8,7 @@ class TypeZone(Enum):
             NORMAL = "normal"
             BLOCKED = "blocked"
             RESTRICTED = "restricted"
-            PRIORITY = "priority"        
+            PRIORITY = "priority"
     """
     NORMAL = "normal"
     BLOCKED = "blocked"
@@ -65,12 +65,12 @@ class Zone:
     """Represent the zone
 
         Attributes:
-            x (int): pos x 
+            x (int): pos x
             y (int): pos y
             is_start (bool): is a start hub
             is_end (bool): is a end hub
             type (TypeZone): the type of the zone
-            max_drones (int): the max drone 
+            max_drones (int): the max drone
                 that can be in this zone
             color (ColorType): The color of the zone
             image (str): The image path of the drone
@@ -88,12 +88,12 @@ class Zone:
         """Constructor of the Zone class
 
             Args:
-                x (int): pos x 
+                x (int): pos x
                 y (int): pos y
                 is_start (bool): is a start hub
                 is_end (bool): is a end hub
                 type (TypeZone): the type of the zone
-                max_drones (int): the max drone 
+                max_drones (int): the max drone
                     that can be in this zone
                 color (ColorType): The color of the zone
                 image (str): The image path of the drone
