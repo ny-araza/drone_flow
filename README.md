@@ -37,8 +37,10 @@ the minimum number of turn across all drones,
 and the total number of turn required for all drones to reach their destination.
 The user can also display and hide the zone's name and drone's name.
 
-The user can zoom and move the map. This ensures the map is displayed properly when it fills the entire screen.
+The user can zoom and move the map using <+> <-> keys or using the moulette. This ensures the map is displayed properly when it fills the entire screen.
 It also ensures that drone names are displayed correctly, even when zones are too close together and the names would otherwise overlap.
+
+User can display or hide the name of each hub using < p >
 
 ### Example program's functionnality
 

@@ -31,4 +31,5 @@ clean:
 	@rm -rf __pycache*
 
 fclean: clean
-	@rm -rf $(VENV)
+	@rm -rf $(VENV) .mypy_cache maps
+
