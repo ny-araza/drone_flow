@@ -6,7 +6,7 @@ from connection import Connection
 from error import ParseError
 from validation import ZoneValidation
 from zone import ColorType, TypeZone, Zone
-
+from color import color_rgb
 
 class Parse:
     """Represent the parse of the map file.txt
@@ -141,6 +141,9 @@ class Parse:
         if self._check_unique_zone_name(name, exists_name):
             if self._validate_zone(line, name, x, y, metadata_dict, map_path):
                 if key == "start_hub":
+                    color = metadata_dict.get("color", "black")
+                    if color not in color_rgb.keys():
+                        color = "black"
                     self.list_zones.append(
                         Zone(
                             name,
@@ -149,7 +152,7 @@ class Parse:
                             is_start=True,
                             is_end=False,
                             max_drones=metadata_dict.get("max_drones", 1),
-                            color=metadata_dict.get("color", "black"),
+                            color=color,
                             type=metadata_dict.get("zone", "normal"),
                             image="./images/start_hub.png",
                         )
@@ -226,13 +229,16 @@ class Parse:
         temp: list[str] = data.split("\n")
         exists_name: list[str] = []
         coords: list[tuple[str, str]] = []
-
         coords_set: set[tuple[str, str]] = set()
+        is_nb_drones: bool = False
 
         for tmp in temp:
             line = temp.index(tmp) + 1
             if not tmp.startswith("#") and tmp:
+                hash_temp = tmp.split("#")
                 item = tmp.split(":")
+                item = hash_temp[0].strip().split(":")
+                print(item)
                 if len(item) != 2:
                     raise ParseError(
                         f"{map_path}: "
@@ -241,9 +247,10 @@ class Parse:
                         "per line must be present in the map file"
                     )
                 key, value = item
-                if key == "nb_drones":
+                if not is_nb_drones and key == "nb_drones":
                     try:
                         self.nb_drones = int(value)
+                        is_nb_drones = True
                         if self.nb_drones <= 0 or self.nb_drones > 100:
                             raise ParseError(
                                 f"{map_path}: "
@@ -253,19 +260,26 @@ class Parse:
                             )
                         continue
                     except ValueError:
-                        self.nb_drones = 0
                         raise ParseError(
                             f"{map_path}: "
-                            f"Line {line} 'nb_drones' must be int and positive"
+                            f"Line {line}, 'nb_drones' must be int and positive"
                         )
                 basedata: list[str] = []
+                if is_nb_drones and key == "nb_drones":
+                    raise ParseError(
+                        f"{map_path} "
+                        f"Line {line} "
+                        "Only one nb_drones must declared in map file"
+                    )
                 if key != "connection":
                     if self.nb_drones <= 0:
                         raise ParseError(
                             "<nb_drones> must be the "
                             "top of the map file"
                         )
+
                     brackets_test = value.split("[")
+
                     if len(brackets_test) > 1:
                         cpt = 0
                         for c in value:
@@ -277,7 +291,11 @@ class Parse:
                                 f"Line {line} The number of "
                                 "brackets must be two"
                             )
+
                     temp_value = value.split("[")
+                    hash_comment = value.split("#")
+                    temp_value = hash_comment[0].split("[")
+
                     if len(brackets_test) > 1:
                         if len(temp_value[0].split(" ")) != 5:
                             raise ParseError(
@@ -285,13 +303,15 @@ class Parse:
                                 f"Line {line} Each line must "
                                 "be separated by one space"
                             )
-                        if not value.endswith("]"):
+                        if not hash_comment[0].strip().endswith("]"):
                             raise ParseError(
                                 f"{map_path}: "
                                 f"Line {line} Metadata must "
                                 "be inside brackets [...]"
                             )
+
                     basedata = temp_value[0].strip(" ").split(" ")
+
                     if len(basedata) != 3:
                         raise ParseError(
                             f"{map_path}: "
@@ -301,11 +321,15 @@ class Parse:
                             "<zone_name> <pos_x> <pos_y> "
                             "[<metadata_key>=<metadata_value>]"
                         )
+
                     zone_metadata = []
                     temp_temp_value = []
+
                     if len(brackets_test) > 1:
                         temp_temp_value = temp_value[1].split(" ")
+
                     metadata_dict: dict[str, Any] = {}
+
                     if not temp_temp_value:
                         metadata_dict = {}
                     for meta_val in temp_temp_value:

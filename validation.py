@@ -1,7 +1,8 @@
 from pydantic import BaseModel, Field, \
-        model_validator
-from zone import TypeZone, ColorType
+        model_validator, field_validator
+from zone import TypeZone
 from typing_extensions import Self
+from color import color_rgb
 
 
 class ZoneValidation(BaseModel):
@@ -24,12 +25,12 @@ class ZoneValidation(BaseModel):
     is_start: bool = Field(default=False)
     is_end: bool = Field(default=False)
     type: TypeZone = Field(default=TypeZone.NORMAL)
-    color: ColorType = Field(default=ColorType.WHITE)
+    color: str = Field(...)
     max_drones: int = Field(default=1)
 
     @model_validator(mode='after')
     def validation(self) -> Self:
-        """Check if the zone name have a -or space
+        """Check if the zone name have a - or space
         """
         forbidden_charactere = "-\n\t\a\b\v\f\r:"
         for char in forbidden_charactere:
@@ -37,4 +38,5 @@ class ZoneValidation(BaseModel):
                 raise ValueError(
                     "Zone name shouldn't contain '-\\n\\t\\a\\b\\v\\f\\r'"
                 )
+
         return self
