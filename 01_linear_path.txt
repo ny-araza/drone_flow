@@ -1,6 +1,6 @@
 # Easy Level 1: Simple linear path
 
-nb_drones: 2
+nb_drones: 2000
 
 start_hub: start 0 0 [color=gre max_drones=1]
 hub: waypoint1 1 1 [color=blue max_drones=2]

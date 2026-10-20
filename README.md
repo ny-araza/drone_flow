@@ -30,6 +30,9 @@ With:
     <li>heappush/heappop: O(Log(n T d))</li>
 </ul>
 
+### Optimisation
+Before, I use a simple list to store the possibility of moove for one drone. This 
+
 ### Visual representation features
 
 For the graphical representation, I have included the number of turn per drone,

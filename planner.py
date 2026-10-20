@@ -140,7 +140,7 @@ class Planner:
 
         if cpt_plan_not_found == len(plans):
             self.loading = False
-            raise PathFindingError("Ar error occured")
+            raise PathFindingError("Path not found")
 
         connexion_drones: dict[frozenset[str], list[str]] = {frozenset(
                 (conn.zone1.name, conn.zone2.name)
@@ -216,6 +216,7 @@ class Planner:
 
             if state in done:
                 continue
+
             done.add(state)
 
             if name == self.end.name:
