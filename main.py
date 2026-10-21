@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
-
+from utils import Utils
+from color import Color
 from display import Display
 from error import ParseError
 from input import Input
@@ -11,6 +12,10 @@ if __name__ == "__main__":
 
         height = 960
         width = 1280
+
+        print()
+        Utils.print_rgb("---FLY-IN---", Color.color_rgb["RED"])
+        print()
 
         if "--folder" in flag:
             if len(flag) != 2:

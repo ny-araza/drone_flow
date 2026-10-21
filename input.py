@@ -79,8 +79,7 @@ class Input:
     def choose_level(self) -> None:
         """Display the choose map in the terminal and take the user choice
         """
-        print()
-        Utils.print_rgb("---FLY-IN---", Color.color_rgb["RED"])
+
         print()
         print("\nAll the map:\n")
         if not os.path.isdir(self.map_folder):

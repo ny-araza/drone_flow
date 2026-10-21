@@ -126,6 +126,7 @@ class Planner:
         cpt_plan_not_found = 0
 
         print(f"\nCalculate each path for {self.nb_drones} drones... ")
+        print()
 
         for i in range(self.nb_drones):
 
@@ -139,8 +140,6 @@ class Planner:
                 self._reserve(path)
                 paths.append(path)
                 plans.append(self._to_actions(path))
-
-            print(f"{i + 1}: {self.zone_use}")
 
             Utils.print_rgb(
                 f"Path for drone {i + 1} found",
