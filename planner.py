@@ -30,7 +30,8 @@ class Planner:
     ) -> None:
         """Constructor of the Planner class
 
-            Args:
+            Args:            print(f"")
+
                 zones (list[Zone]): all the zones stored in a list
                 connections (list[Connection]): All the connection
                     sotred in a list
@@ -60,6 +61,7 @@ class Planner:
                 self.adj[src.name].append((dst, key, cap, cost))
         self.zone_use: dict[tuple[str, int], int] = {}
         self.link_use: dict[tuple[frozenset[str], int], int] = {}
+
         self.timeline: dict[int, list[tuple[str, str]]]
 
     def check_reachable(self) -> None:
@@ -123,7 +125,10 @@ class Planner:
 
         cpt_plan_not_found = 0
 
+        print(f"Calculate each path for {self.nb_drones} drones... ")
+
         for i in range(self.nb_drones):
+
             path = self._find_path()
             if path is None:
                 print(f"No path found for drone {i + 1}")
@@ -134,6 +139,11 @@ class Planner:
                 self._reserve(path)
                 paths.append(path)
                 plans.append(self._to_actions(path))
+
+            Utils.print_rgb(f"Path for drone {i + 1} found", color_rgb["GREEN"])
+            print()
+
+        print(f"All path found")
 
         cpt = 0
         goal_cpt = 0

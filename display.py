@@ -183,40 +183,35 @@ class Display:
                 start_zone = zone
 
         plans: list[list[Action]] = []
-        loading = True
-        planner = Planner([], [], 0)
+        # def start_planning() -> None:
+        #     nonlocal plans, loading, planner
+        #     plans = []
+        #     loading = True
+        #     planner = Planner([], [], 0)
 
-        def start_planning() -> None:
-            nonlocal plans, loading, planner
-            plans = []
-            loading = True
-            planner = Planner([], [], 0)
+        #     def calculate() -> None:
+        #         nonlocal plans, loading, planner
+        #         try:
+        #             planner = Planner(
+        #                 zones,
+        #                 self.parse.list_connections,
+        #                 self.parse.nb_drones,
+        #             )
+        #             result = planner.plan_all()
+        #             plans = result
+        #             loading = False
+        #         except PathFindingError as e:
+        #             raise PathFindingError(str(e))
+        #         finally:
+        #             loading = False
 
-            def calculate() -> None:
-                nonlocal plans, loading, planner
-                try:
-                    planner = Planner(
-                        zones,
-                        self.parse.list_connections,
-                        self.parse.nb_drones,
-                    )
-                    result = planner.plan_all()
-                    plans = result
-                    loading = False
-                except PathFindingError as e:
-                    raise PathFindingError(str(e))
-                finally:
-                    loading = False
-
-            threading.Thread(target=calculate, daemon=True).start()
+        #     threading.Thread(target=calculate, daemon=True).start()
 
         total_turns = 0
         current_turn = 0
         finished = False
         dt = 0.0
         restart = False
-        pause = False
-        angle = 0
 
         restart_option_label = "<R> to restart"
         zone_name_option_label = "<P> to display/not zone name"
@@ -226,16 +221,13 @@ class Display:
         display_stats = True
         display_name = False
 
-        try:
-            Planner(
+        planner = Planner(
                 zones,
                 self.parse.list_connections,
                 self.parse.nb_drones,
-            ).check_reachable()
-        except PathFindingError:
-            raise Exception("No path found")
+        )
 
-        start_planning()
+        plans = planner.plan_all()
 
         self._update_boxes()
 
@@ -287,14 +279,6 @@ class Display:
                     dragging = False
 
             self.screen.fill((21, 0, 79))
-            if loading:
-                self._draw_loading(angle)
-
-                angle = (angle + 5) % 360
-
-                pg.display.flip()
-                dt = self.clock.tick(FPS) / 1000
-                continue
 
             total_turns = max(
                 (len(p) for p in plans),
@@ -309,6 +293,7 @@ class Display:
                     )
                     for _ in range(self.parse.nb_drones)
                 ]
+
                 finished = False
                 current_turn = 0
                 dt = 0.0
