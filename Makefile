@@ -4,6 +4,8 @@ VENV=.venv
 PY_VENV=$(VENV)/bin/python
 export UV_CACHE_DIR=/home/$(USER)/goinfre/uv_cache
 
+.PHONY: all install_package run run-folder install lint lint-strict clean fclean
+
 all:$(TARGET) install install_package run
 
 install_package:
@@ -33,3 +35,4 @@ clean:
 fclean: clean
 	@rm -rf $(VENV) .mypy_cache maps
 
+re: fclean all
