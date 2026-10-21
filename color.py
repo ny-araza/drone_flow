@@ -1,5 +1,5 @@
 from typing import Any
-import math
+
 
 class Color:
     color_rgb: dict[str, Any] = {
@@ -23,4 +23,4 @@ class Color:
         "RAINBOW":   (255, 255, 255),
         "GRAY":      (128, 128, 128),
         "BLACK":     (0, 0, 0)
-    }      
+    }

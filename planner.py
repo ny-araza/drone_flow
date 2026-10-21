@@ -192,13 +192,17 @@ class Planner:
 
                     Utils.print_rgb(
                         f"D{y + 1}-{current_zone}-{next_zone}",
-                        Color.color_rgb[str(self.zones[next_zone].color).upper()],
+                        Color.color_rgb[
+                            str(self.zones[next_zone].color).upper()
+                        ],
                     )
 
                 else:
                     Utils.print_rgb(
                         f"D{y + 1}-{next_zone}",
-                        Color.color_rgb[str(self.zones[next_zone].color).upper()],
+                        Color.color_rgb[
+                            str(self.zones[next_zone].color).upper()
+                        ],
                     )
 
             print()

@@ -116,7 +116,8 @@ class Display:
         font = pg.font.Font(None, 36)
 
         text = font.render(
-            "Calculate the path for all drones...", True, Color.color_rgb["GREEN"]
+            "Calculate the path for all drones...", True,
+            Color.color_rgb["GREEN"]
         )
 
         text_rect = text.get_rect(center=(center[0], center[1] + 80))
@@ -273,7 +274,10 @@ class Display:
             for conn in self.parse.list_connections:
                 pos1 = self.boxes[zone_index[conn.zone1.name]].center
                 pos2 = self.boxes[zone_index[conn.zone2.name]].center
-                pg.draw.line(self.screen, Color.color_rgb["WHITE"], pos1, pos2, 2)
+                pg.draw.line(
+                    self.screen, Color.color_rgb["WHITE"],
+                    pos1, pos2, 2
+                )
 
             show_names = display_name
             zone_font = pg.font.Font(None, 24) if show_names else None
