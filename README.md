@@ -31,7 +31,7 @@ With:
 </ul>
 
 ### Optimisation
-Before, I use a simple list to store the possibility of moove for one drone. This 
+Before, I use a simple list to store the possibility of move for one drone. This 
 
 ### Visual representation features
 

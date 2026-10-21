@@ -13,9 +13,6 @@ if __name__ == "__main__":
         height = 960
         width = 1280
 
-        print()
-        Utils.print_rgb("---FLY-IN---", Color.color_rgb["RED"])
-        print()
 
         if "--folder" in flag:
             if len(flag) != 2:
@@ -23,6 +20,9 @@ if __name__ == "__main__":
                     "Flag --folder must be python "
                     "main.py --folder <map_folder>"
                 )
+            print()
+            Utils.print_rgb("---FLY-IN---", Color.color_rgb["RED"])
+            print()
             path = Path(flag[1])
             if not path.is_dir():
                 raise ParseError(
@@ -39,6 +39,9 @@ if __name__ == "__main__":
                     "To run this program: "
                     "python main.py <file_path>"
                 )
+            print()
+            Utils.print_rgb("---FLY-IN---", Color.color_rgb["RED"])
+            print()
             display = Display(flag[0], width, height)
             display.display_window()
 
