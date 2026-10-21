@@ -31,7 +31,8 @@ With:
 </ul>
 
 ### Optimisation
-Before, I use a simple list to store the possibility of move for one drone. This 
+Before, I used a simple list to store a drone's possible movements; each time, I would call a sort function to find the minimum value, which was not efficient in terms of performance.
+I then replaced it with a heap—a structure that sorts itself upon every insertion (push). It places the smallest element at the top of the tree, making it easy to retrieve the minimum and resulting in faster execution.
 
 ### Visual representation features
 
