@@ -1,6 +1,7 @@
 import os
 from error import ParseError
-from colorama import Fore, Style
+from utils import Utils
+from color import Color
 
 
 class Input:
@@ -34,7 +35,11 @@ class Input:
         """
         for i in range(len(sub_folder)):
             print(i, end=" ")
-            print(Fore.GREEN + sub_folder[i] + Style.RESET_ALL)
+            Utils.print_rgb(
+                f"{sub_folder[i]}",
+                Color.color_rgb["GREEN"]
+            )
+            print()
 
     @staticmethod
     def get_subfolders(path: str) -> list[str]:
@@ -74,8 +79,9 @@ class Input:
     def choose_level(self) -> None:
         """Display the choose map in the terminal and take the user choice
         """
-        print("")
-        print(Fore.RED + "---FLY-IN---" + Style.RESET_ALL)
+        print()
+        Utils.print_rgb("---FLY-IN---", Color.color_rgb["RED"])
+        print()
         print("\nAll the map:\n")
         if not os.path.isdir(self.map_folder):
             raise ParseError("'maps' must be a dir")
