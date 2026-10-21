@@ -1,12 +1,10 @@
-import threading
 import math
 
 from drones import Drone
-from error import PathFindingError
 from planner import Action, Planner
 from zone import Zone
 
-from color import color_rgb
+from color import Color
 from parse import Parse
 from utils import Utils
 
@@ -113,12 +111,12 @@ class Display:
         y = center[1] + int(math.sin(rad) * radius)
 
         if self.screen:
-            pg.draw.circle(self.screen, color_rgb["BLUE"], (x, y), 8)
+            pg.draw.circle(self.screen, Color.color_rgb["BLUE"], (x, y), 8)
 
         font = pg.font.Font(None, 36)
 
         text = font.render(
-            "Calculate the path for all drones...", True, color_rgb["GREEN"]
+            "Calculate the path for all drones...", True, Color.color_rgb["GREEN"]
         )
 
         text_rect = text.get_rect(center=(center[0], center[1] + 80))
@@ -153,7 +151,7 @@ class Display:
         text_drawed = self.font.render(
             text,
             True,
-            color_rgb[color.upper()],
+            Color.color_rgb[color.upper()],
         )
         if self.screen:
             self.screen.blit(text_drawed, (x, y))
@@ -172,7 +170,7 @@ class Display:
             name="start",
             x=0,
             y=0,
-            color=color_rgb["WHITE"],
+            color=Color.color_rgb["WHITE"],
         )
         colors = []
 
@@ -183,29 +181,6 @@ class Display:
                 start_zone = zone
 
         plans: list[list[Action]] = []
-        # def start_planning() -> None:
-        #     nonlocal plans, loading, planner
-        #     plans = []
-        #     loading = True
-        #     planner = Planner([], [], 0)
-
-        #     def calculate() -> None:
-        #         nonlocal plans, loading, planner
-        #         try:
-        #             planner = Planner(
-        #                 zones,
-        #                 self.parse.list_connections,
-        #                 self.parse.nb_drones,
-        #             )
-        #             result = planner.plan_all()
-        #             plans = result
-        #             loading = False
-        #         except PathFindingError as e:
-        #             raise PathFindingError(str(e))
-        #         finally:
-        #             loading = False
-
-        #     threading.Thread(target=calculate, daemon=True).start()
 
         total_turns = 0
         current_turn = 0
@@ -251,9 +226,6 @@ class Display:
 
                     elif event.key == pg.K_r:
                         restart = True
-
-                    elif event.key == pg.K_SPACE:
-                        pause = not pause
 
                     elif event.key == pg.K_p:
                         display_name = not display_name
@@ -301,7 +273,7 @@ class Display:
             for conn in self.parse.list_connections:
                 pos1 = self.boxes[zone_index[conn.zone1.name]].center
                 pos2 = self.boxes[zone_index[conn.zone2.name]].center
-                pg.draw.line(self.screen, color_rgb["WHITE"], pos1, pos2, 2)
+                pg.draw.line(self.screen, Color.color_rgb["WHITE"], pos1, pos2, 2)
 
             show_names = display_name
             zone_font = pg.font.Font(None, 24) if show_names else None
@@ -310,14 +282,14 @@ class Display:
             for i, box in enumerate(self.boxes):
                 pg.draw.rect(
                     self.screen,
-                    color_rgb[str(colors[i]).upper()],
+                    Color.color_rgb[str(colors[i]).upper()],
                     box
                 )
 
                 if zone_font is not None:
                     text = zone_font.render(
                         zones[i].name, True,
-                        color_rgb["WHITE"]
+                        Color.color_rgb["WHITE"]
                     )
                     text_rect = text.get_rect()
                     text_rect.midtop = (box.centerx, box.bottom + margin)
@@ -353,7 +325,7 @@ class Display:
                     self.offset_y
                 )
                 label = self.font.render(
-                    f"D{i + 1}: {drone.turn}", True, color_rgb["WHITE"]
+                    f"D{i + 1}: {drone.turn}", True, Color.color_rgb["WHITE"]
                 )
                 label_rect = label.get_rect()
                 label_rect.midbottom = (sx, sy - self.cell_size // 4)

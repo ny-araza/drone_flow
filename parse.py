@@ -6,7 +6,7 @@ from connection import Connection
 from error import ParseError
 from validation import ZoneValidation
 from zone import ColorType, TypeZone, Zone
-from color import color_rgb
+from color import Color
 
 
 class Parse:
@@ -146,7 +146,7 @@ class Parse:
         if self._check_unique_zone_name(name, exists_name):
             color = metadata_dict.get("color", "white")
 
-            key_color = [c.lower() for c in color_rgb.keys()]
+            key_color = [c.lower() for c in Color.color_rgb.keys()]
             if color not in key_color:
                 color = "white"
             if self._validate_zone(line, name, x, y, metadata_dict, map_path):

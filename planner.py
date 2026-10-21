@@ -5,7 +5,7 @@ from error import PathFindingError
 from zone import Zone
 from connection import Connection
 
-from color import color_rgb
+from color import Color
 from utils import Utils
 
 INF = float("inf")
@@ -125,7 +125,7 @@ class Planner:
 
         cpt_plan_not_found = 0
 
-        print(f"Calculate each path for {self.nb_drones} drones... ")
+        print(f"\nCalculate each path for {self.nb_drones} drones... ")
 
         for i in range(self.nb_drones):
 
@@ -140,10 +140,15 @@ class Planner:
                 paths.append(path)
                 plans.append(self._to_actions(path))
 
-            Utils.print_rgb(f"Path for drone {i + 1} found", color_rgb["GREEN"])
-            print()
+            print(f"{i + 1}: {self.zone_use}")
 
-        print(f"All path found")
+            Utils.print_rgb(
+                f"Path for drone {i + 1} found",
+                Color.color_rgb["GREEN"]
+            )
+            print("\n")
+
+        print("All path found\n")
 
         cpt = 0
         goal_cpt = 0
@@ -187,13 +192,13 @@ class Planner:
 
                     Utils.print_rgb(
                         f"D{y + 1}-{current_zone}-{next_zone}",
-                        color_rgb[str(self.zones[next_zone].color).upper()],
+                        Color.color_rgb[str(self.zones[next_zone].color).upper()],
                     )
 
                 else:
                     Utils.print_rgb(
                         f"D{y + 1}-{next_zone}",
-                        color_rgb[str(self.zones[next_zone].color).upper()],
+                        Color.color_rgb[str(self.zones[next_zone].color).upper()],
                     )
 
             print()
