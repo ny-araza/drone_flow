@@ -13,7 +13,6 @@ if __name__ == "__main__":
         height = 960
         width = 1280
 
-
         if "--folder" in flag:
             if len(flag) != 2:
                 raise ParseError(

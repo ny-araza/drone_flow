@@ -3,10 +3,7 @@ PY_VENV=$(VENV)/bin/python
 
 .PHONY: all install_package run run-folder install lint lint-strict clean fclean
 
-all:$(TARGET) install install_package run
-
-install_package:
-	@$(PY_VENV) -m pip install -r requirements.txt
+all:install run
 
 run:
 	@$(PY_VENV) main.py $(ARGS)
@@ -16,15 +13,16 @@ run-folder:
 
 install:
 	@python -m venv $(VENV)
+	@$(PY_VENV) -m pip install -r requirements.txt
 
 lint:
-	@$(PY_VENV) -m flake8 . --exclude=.venv && mypy . --warn-return-any \
+	@$(PY_VENV) -m flake8 . --exclude=.venv && $(PY_VENV) -m mypy . --warn-return-any \
 		--warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs \
 		--check-untyped-defs --exclude .venv/
 
 lint-strict:
 	@$(PY_VENV) -m flake8 . --exclude=.venv && mypy --install-types && \
-		mypy . --strict  --exclude .venv/
+		$(PY_VENV) -m mypy . --strict  --exclude .venv/
 
 clean:
 	@rm -rf __pycache*
