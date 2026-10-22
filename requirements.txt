@@ -1,5 +1,4 @@
-pygame 
-colorama 
+pygame
 flake8 
 mypy 
 pydantic
