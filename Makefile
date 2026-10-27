@@ -3,7 +3,7 @@ PY_VENV=$(VENV)/bin/python
 
 .PHONY: all install_package run run-folder install lint lint-strict clean fclean
 
-all:install run
+all:install
 
 run:
 	@$(PY_VENV) main.py $(ARGS)

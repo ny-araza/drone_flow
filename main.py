@@ -20,8 +20,8 @@ if __name__ == "__main__":
                     "main.py --folder <map_folder>"
                 )
             print()
-            Utils.print_rgb("---FLY-IN---", Color.color_rgb["RED"])
             print()
+            Utils.print_rgb("---FLY-IN---", Color.color_rgb["RED"])
             path = Path(flag[1])
             if not path.is_dir():
                 raise ParseError(
@@ -39,9 +39,9 @@ if __name__ == "__main__":
                     "python main.py <file_path>"
                 )
             print()
-            Utils.print_rgb("---FLY-IN---", Color.color_rgb["RED"])
             print()
             display = Display(flag[0], width, height)
+            Utils.print_rgb("---FLY-IN---", Color.color_rgb["RED"])
             display.display_window()
 
     except KeyboardInterrupt:
