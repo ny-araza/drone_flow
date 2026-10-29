@@ -298,7 +298,10 @@ class Planner:
                 heap (list[tuple[int, int, str]]): The heap list that store
                     all the possibility move for a drone
         """
-        if pen < dist.get(nxt, INF):
+        old = dist.get(nxt, INF)
+        better = pen < old
+        wait = pen == old and cur[0] == nxt[0]
+        if better or wait:
             dist[nxt] = pen
             parent[nxt] = cur
             heapq.heappush(heap, (nxt[1], pen, nxt[0]))

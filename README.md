@@ -138,3 +138,50 @@ At t2, it moves toward the goal.
     <li>Help me for the comprehension of dijkstra's algorithm</li>
     <li>Help me for debuging pygame</li>
 </ul>
+
+
+#############
+
+Ce n’est pas la capacité start → waypoint1 qui bloque, il y a deux causes.
+
+1. Ta map limite le passage à 1 drone par tour
+
+waypoint2 n’a pas de max_drones, donc il prend probablement la valeur par défaut (1). Même chose pour les connexions waypoint1-waypoint2 et waypoint2-goal, dont la capacité par défaut est 1. Au maximum, un drone entre donc dans waypoint2 à chaque tour. Pour que tout avance en groupe, il faut :
+```bash
+hub: waypoint2 2 0 [max_drones=7]
+connection: waypoint1-waypoint2 [max_link_capacity=7]
+connection: waypoint2-goal [max_link_capacity=7]
+```
+2. Le Dijkstra attend au départ au lieu d’attendre dans waypoint1
+
+Même avec le goulot en 1 drone par tour, ton attente devrait se faire dans waypoint1, comme tu le décris. Ici, le drone 2 reste sur start puis entre dans waypoint1 plus tard, d’où l’effet « un par un ».
+
+La cause est dans _push :
+
+```python
+if pen < dist.get(nxt, INF):
+```
+Le comparateur est strict (<). Pour l’état (waypoint1, 2), il y a deux chemins de même coût :
+
+A : attendre à start au tour 1, puis aller à waypoint1.
+B : aller à waypoint1 au tour 1, puis y attendre.
+
+Le heap est trié par (t, pen, name) et (start, 1) a pen=0, donc il sort avant (waypoint1, 1). A est poussé en premier, et B, à égalité, ne le remplace pas à cause du < strict. Le drone attend donc sur start, qui a une capacité infinie.
+
+Correction : en cas d’égalité, préférer le parent qui est une attente (même zone). Le drone avance alors le plus tôt possible et n’attend que dans la dernière zone atteinte :
+
+```python
+@staticmethod
+def _push(cur, nxt, pen, dist, parent, heap) -> None:
+    old = dist.get(nxt, INF)
+    better = pen < old
+    # à égalité, préférer "avancer d'abord, attendre ensuite"
+    tie_wait = pen == old and cur[0] == nxt[0]
+    if better or tie_wait:
+        dist[nxt] = pen
+        parent[nxt] = cur
+        heapq.heappush(heap, (nxt[1], pen, nxt[0]))
+```
+Avec ça, et la map corrigée, les 7 drones vont sur waypoint1 au tour 1. Si waypoint2 reste limité à 1, ils attendent dans waypoint1 (capacité 7) et passent un par un, sans bloquer start.
+
+Le temps total est le même dans les deux cas. Seul l’ordre des déplacements change, mais c’est plus fidèle à ce qu’on attend visuellement.
