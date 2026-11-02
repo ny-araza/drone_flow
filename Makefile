@@ -21,7 +21,7 @@ lint:
 		--check-untyped-defs --exclude .venv/
 
 lint-strict:
-	@$(PY_VENV) $(VENV)/bin/flake8 . --exclude=.venv && mypy --install-types && \
+	@$(PY_VENV) $(VENV)/bin/flake8 . --exclude=.venv && $(PY_VENV) $(VENV)/bin/mypy --install-types && \
 		$(PY_VENV) $(VENV)/bin/mypy . --strict  --exclude .venv/
 
 clean:

@@ -152,6 +152,12 @@ class Parse:
                 color = "white"
             if self._validate_zone(line, name, x, y, metadata_dict, map_path):
                 if key == "start_hub":
+                    if metadata_dict.get("zone", "normal") == "blocked":
+                        raise ParseError(
+                            f"{map_path}: "
+                            f"Line {line} "
+                            "Start hub zone type can't be 'blocked'"
+                        )
                     if cpt_start_end.get("start", 0) >= 1:
                         raise ParseError(
                             f"{map_path}: "
@@ -176,6 +182,13 @@ class Parse:
                         cpt_start_end["start"] += 1
 
                 elif key == "end_hub":
+
+                    if metadata_dict.get("zone", "normal") == "blocked":
+                        raise ParseError(
+                            f"{map_path}: "
+                            f"Line {line} "
+                            "End hub zone type can't be 'blocked'"
+                    )
 
                     if cpt_start_end["end"] >= 1:
                         raise ParseError(
