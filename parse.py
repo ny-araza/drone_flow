@@ -88,7 +88,7 @@ class Parse:
                 raise ParseError(f"{map_path}: Line {line} {error['msg']}")
             return False
 
-    def _sotck_zones(
+    def _stock_zones(
         self,
         line: int,
         key: str,
@@ -99,7 +99,8 @@ class Parse:
         coords_set: set[tuple[str, str]],
         map_path: str,
         width: int,
-        height: int
+        height: int,
+        cpt_start_end: dict[str, int]
     ) -> None:
         """Stock the zone found into a list of zone
 
@@ -151,34 +152,53 @@ class Parse:
                 color = "white"
             if self._validate_zone(line, name, x, y, metadata_dict, map_path):
                 if key == "start_hub":
+                    if cpt_start_end.get("start", 0) >= 1:
+                        raise ParseError(
+                            f"{map_path}: "
+                            f"Line {line} "
+                            "Start hub must be unique in map file"
+                        )
+                    else:
+                        self.list_zones.append(
+                            Zone(
+                                name,
+                                int(x),
+                                int(y),
+                                is_start=True,
+                                is_end=False,
+                                max_drones=metadata_dict.get("max_drones", 1),
+                                color=color,
+                                type=metadata_dict.get("zone", "normal"),
+                                image="./images/start_hub.png",
+                            )
+                        )
 
-                    self.list_zones.append(
-                        Zone(
-                            name,
-                            int(x),
-                            int(y),
-                            is_start=True,
-                            is_end=False,
-                            max_drones=metadata_dict.get("max_drones", 1),
-                            color=color,
-                            type=metadata_dict.get("zone", "normal"),
-                            image="./images/start_hub.png",
-                        )
-                    )
+                        cpt_start_end["start"] += 1
+
                 elif key == "end_hub":
-                    self.list_zones.append(
-                        Zone(
-                            name,
-                            int(x),
-                            int(y),
-                            is_start=False,
-                            is_end=True,
-                            max_drones=metadata_dict.get("max_drones", 1),
-                            color=color,
-                            type=metadata_dict.get("zone", "normal"),
-                            image="./images/end_hub_50x50.png",
+
+                    if cpt_start_end["end"] >= 1:
+                        raise ParseError(
+                            f"{map_path}: "
+                            f"Line {line} "
+                            "End hub must be unique in map file"
                         )
-                    )
+                    else:
+                        self.list_zones.append(
+                            Zone(
+                                name,
+                                int(x),
+                                int(y),
+                                is_start=False,
+                                is_end=True,
+                                max_drones=metadata_dict.get("max_drones", 1),
+                                color=color,
+                                type=metadata_dict.get("zone", "normal"),
+                                image="./images/end_hub_50x50.png",
+                            )
+                        )
+                        cpt_start_end["end"] += 1
+
                 elif key == "hub":
                     self.list_zones.append(
                         Zone(
@@ -240,6 +260,7 @@ class Parse:
         coords_set: set[tuple[str, str]] = set()
         is_nb_drones: bool = False
         exist_conn: set[frozenset[str]] = set()
+        cpt_start_end: dict[str, int] = {"start": 0, "end": 0}
 
         for tmp in temp:
             line = temp.index(tmp) + 1
@@ -381,7 +402,7 @@ class Parse:
                             "'zone', 'color' or 'max_drones'"
                         )
 
-                    self._sotck_zones(
+                    self._stock_zones(
                         line,
                         key,
                         basedata,
@@ -391,7 +412,8 @@ class Parse:
                         coords_set,
                         map_path,
                         width,
-                        height
+                        height,
+                        cpt_start_end,
                     )
 
                 elif key == "connection":
