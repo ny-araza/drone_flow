@@ -293,11 +293,11 @@ class Parse:
                     try:
                         self.nb_drones = int(value)
                         is_nb_drones = True
-                        if self.nb_drones <= 0:
+                        if self.nb_drones <= 0 or self.nb_drones > 1000:
                             raise ParseError(
                                 f"{map_path}: "
                                 f"Line {line} "
-                                "'nb_drones' must be greater than 0"
+                                "'nb_drones' must be greater than 0 and lower than 1000"
                             )
                         continue
                     except ValueError:
