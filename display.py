@@ -339,19 +339,7 @@ class Display:
                     10,
                     10,
                 )
-                self._draw_text(
-                    f"Average turn for each "
-                    f"drone: {self._average_turn(list_drones)}",
-                    "green",
-                    10,
-                    text_margin + MAX_ZONE_FONT,
-                )
-                self._draw_text(
-                    f"Total path cost: {total_turns * len(list_drones)}",
-                    "green",
-                    10,
-                    text_margin + (MAX_ZONE_FONT * 2),
-                )
+
                 self._draw_text(
                     restart_option_label,
                     "white",
