@@ -1,0 +1,12 @@
+[project]
+name = "fly-in"
+version = "0.1.0"
+description = "Simulate drone motion reaching the shortest path to point A to point B"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "flake8>=7.5.0",
+    "mypy>=2.4.1",
+    "pydantic>=2.14.2",
+    "pygame>=2.6.1",
+]

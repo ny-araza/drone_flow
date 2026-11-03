@@ -188,7 +188,7 @@ class Parse:
                             f"{map_path}: "
                             f"Line {line} "
                             "End hub zone type can't be 'blocked'"
-                    )
+                        )
 
                     if cpt_start_end["end"] >= 1:
                         raise ParseError(
@@ -297,7 +297,8 @@ class Parse:
                             raise ParseError(
                                 f"{map_path}: "
                                 f"Line {line} "
-                                "'nb_drones' must be greater than 0 and lower than 1000"
+                                "'nb_drones' must be greater than 0 and lower"
+                                " than 1000"
                             )
                         continue
                     except ValueError:
