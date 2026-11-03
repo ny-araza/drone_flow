@@ -325,7 +325,7 @@ class Display:
                     self.offset_y
                 )
                 label = self.font.render(
-                    f"D{i + 1}: {drone.turn}", True, Color.color_rgb["WHITE"]
+                    f"D{i + 1}: {current_turn}", True, Color.color_rgb["WHITE"]
                 )
                 label_rect = label.get_rect()
                 label_rect.midbottom = (sx, sy - self.cell_size // 4)
