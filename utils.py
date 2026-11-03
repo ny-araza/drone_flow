@@ -1,0 +1,73 @@
+class Utils:
+    """Represent all the function that is utils from the program
+    """
+    @staticmethod
+    def read_file(file_path: str) -> str:
+        """Read the file map
+
+            Args:
+                file_path (str): the file map path
+
+            Returns:
+                str
+        """
+        data: str = ""
+        with open(file_path, "r", encoding="utf-8") as fd:
+            data = fd.read()
+        return data
+
+    @staticmethod
+    def print_rgb(text: str, rgb: tuple[int, int, int]) -> None:
+        """Display a colored text in the terminal
+
+            Args:
+                text (str): The text that be printed
+                rgb (tuple[int, int, int]): color of the text (rgb)
+        """
+        r, g, b = rgb
+        print(f"\033[38;2;{r};{g};{b}m{text}\033[0m", end=" ")
+
+    @staticmethod
+    def get_drone_in_each_turn(
+        current_zone: str,
+        next_zone: str,
+        drone: str,
+        zone_drones: dict[str, list[str]]
+    ) -> None:
+        """Display the drone information in each turn
+
+            Args:
+                current_zone (str): the current zone that the drone is
+                next_zone (str): the target of the drone
+                drone (str): the ID of the drone
+                zone_drones (dict[str, list[str]]): list of the drone
+                    in zone in each turn
+        """
+        if current_zone != next_zone:
+            if drone in zone_drones[current_zone]:
+                zone_drones[current_zone].remove(drone)
+
+            if drone not in zone_drones[next_zone]:
+                zone_drones[next_zone].append(drone)
+
+    @staticmethod
+    def get_connnexion_in_each_turn(
+        current_zone: str,
+        next_zone: str,
+        drone: str,
+        connexion_drones: dict[frozenset[str], list[str]]
+    ) -> None:
+        """Display the drone information in each
+            turn for connection
+
+            Args:
+                current_zone (str): the current zone that the drone is
+                next_zone (str): the target of the drone
+                drone (str): the ID of the drone
+                connexion_drones (dict[str, list[str]]): list of the drone
+                    in connection in each turn
+        """
+        connexion = frozenset((current_zone, next_zone))
+        if connexion in connexion_drones:
+            if drone not in connexion_drones[connexion]:
+                connexion_drones[connexion].append(drone)
