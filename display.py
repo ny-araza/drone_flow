@@ -1,3 +1,5 @@
+"""Module that display the graphical visualization."""
+
 import math
 
 from drones import Drone
@@ -19,18 +21,17 @@ MIN_ZONE_FONT = 10
 
 
 class Display:
+    """Represent the graphical representation.
 
-    """Represent the graphical representation
+    Public Methods:
+        display_window: Diplay the window and
+        show the simulation
 
-        Public Methods:
-            display_window: Diplay the window and
-            show the simulation
-
-        Attributes:
-            map_path (str): The path to the map file
-            width (int): the width of the window
-            height (int): the height of the window
-            cell_size (int): the size of zone (cell_size*cell_size)
+    Attributes:
+        map_path (str): The path to the map file
+        width (int): the width of the window
+        height (int): the height of the window
+        cell_size (int): the size of zone (cell_size*cell_size)
     """
 
     def __init__(
@@ -40,13 +41,13 @@ class Display:
         height: int = 960,
         cell_size: int = 60,
     ):
-        """Constructor of the Display class
+        """Represent the constructor for display class.
 
-            Args:
-                map_path (str): The path to the map file
-                width (int): the width of the window
-                height (int): the height of the window
-                cell_size (int): the size of zone (cell_size*cell_size)
+        Args:
+            map_path (str): The path to the map file
+            width (int): the width of the window
+            height (int): the height of the window
+            cell_size (int): the size of zone (cell_size*cell_size)
         """
         self.parse: Parse = Parse()
         temp_data = Utils.read_file(map_path)
@@ -65,8 +66,7 @@ class Display:
         self.font = pg.font.Font(None, 24)
 
     def _update_boxes(self) -> None:
-        """Update the size of zone while zooming
-        """
+        """Update the size of zone while zooming."""
         half = self.cell_size // 2
         for box, zone in zip(self.boxes, self.parse.list_zones):
             box.size = (half, half)
@@ -76,10 +76,9 @@ class Display:
             )
 
     def _zoom(self, step: int) -> None:
-        """increases the box zone size or decreases it,
-            depending on `step`
+        """Increases the box zone size or decreases it.
 
-            step (int): cell_size increase factor
+        step (int): cell_size increase factor
         """
         new_size = self.cell_size + step
         if not MIN_CELL <= new_size <= MAX_CELL:
@@ -88,12 +87,11 @@ class Display:
         self._update_boxes()
 
     def _draw_loading(self, angle: int) -> None:
-        """displays a loading screen while the program
-            calculates the path for each drone
+        """Display a loading screen.
 
-            angle (int): Angle of the small circle
-                rotating on the large circle; it increases
-                with each Pygame loop (from 0 to 360).
+        angle (int): Angle of the small circle
+            rotating on the large circle; it increases
+            with each Pygame loop (from 0 to 360).
         """
         if self.screen:
             center = (
@@ -126,10 +124,10 @@ class Display:
             self.screen.blit(text, text_rect)
 
     def _average_turn(self, list_drones: list[Drone]) -> int:
-        """Calculate the average turn for each drone
+        """Calculate the average turn for each drone.
 
-            Args:
-                list_drones (list[Drone]): All the drone with metadata
+        Args:
+            list_drones (list[Drone]): All the drone with metadata
         """
         total_turn = 0
 
@@ -139,15 +137,15 @@ class Display:
         return total_turn // len(list_drones)
 
     def _draw_text(self, text: str, color: str, x: int, y: int) -> None:
-        """Draw a string in the screen of pygame
+        """Draw a string in the screen of pygame.
 
-            Args:
-                text (str): The text that show in the screen
-                color (str): The color of the text
-                x (int): the x position to place
-                the text in the screen
-                y (int): the y position to place
-                the text in the screen
+        Args:
+            text (str): The text that show in the screen
+            color (str): The color of the text
+            x (int): the x position to place
+            the text in the screen
+            y (int): the y position to place
+            the text in the screen
         """
         text_drawed = self.font.render(
             text,
@@ -158,9 +156,7 @@ class Display:
             self.screen.blit(text_drawed, (x, y))
 
     def display_window(self) -> None:
-        """Display the pygame window that show the simulation
-            of each drone to reach the destintation path
-        """
+        """Display the pygame window that show the simulation."""
         running = True
         dragging = False
 

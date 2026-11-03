@@ -1,16 +1,25 @@
+"""Represent all the drone during simulation."""
+
 import pygame as pg
 
 
 class Drone:
-    """Represent the drone
+    """Represent the drone.
 
-        Attributes:
-            x (float): the x exact position in pygame screen
-            y (float): the y exact position in pygame screen
-            image (str): The path of the drone image
+    Attributes:
+        x (float): the x exact position in pygame screen
+        y (float): the y exact position in pygame screen
+        image (str): The path of the drone image
     """
-    def __init__(self, x: float, y: float, image: str) -> None:
 
+    def __init__(self, x: float, y: float, image: str) -> None:
+        """Represent the constructor of the Drone class.
+
+        Args:
+            x (float): posX of the drone
+            y (float): posY of the drone
+            image (str): the drone image
+        """
         self.x = x
         self.y = y
 
@@ -28,15 +37,15 @@ class Drone:
         self._scaled_size = 0
 
     def move_to(self, target_x: float, target_y: float, dt: float) -> bool:
-        """Caclulate if the drone is arrived to the dest or not
+        """Caclulate if the drone is arrived to the dest or not.
 
-            Args:
-                target_x (float): x position of target in pygame screen
-                target_y (float): y position of target in pygame screen
-                dt (float): time elapsed
+        Args:
+            target_x (float): x position of target in pygame screen
+            target_y (float): y position of target in pygame screen
+            dt (float): time elapsed
 
-            Returns:
-                bool
+        Returns:
+            bool
         """
         dx = target_x - self.x
         dy = target_y - self.y
@@ -57,16 +66,16 @@ class Drone:
     def screen_pos(
         self, cell_size: int, offset_x: int, offset_y: int
     ) -> tuple[int, int]:
-        """Convert the pos in map to a exact screen pos
+        """Convert the pos in map to a exact screen pos.
 
-            Args:
-                cell_size (int): The size of the box's zone
-                offset_x (int): Use if the user move the entire map
-                    . Its a represent the mouse x pos
-                offset_x (int): its represents the y pos mouse.
+        Args:
+            cell_size (int): The size of the box's zone
+            offset_x (int): Use if the user move the entire map
+                . Its a represent the mouse x pos
+            offset_x (int): its represents the y pos mouse.
 
-            Returns:
-                tuple[int, int]
+        Returns:
+            tuple[int, int]
         """
         return (
             int(self.x * cell_size + cell_size // 2 + offset_x),
@@ -80,13 +89,13 @@ class Drone:
         offset_x: int,
         offset_y: int,
     ) -> None:
-        """Draw the drone in the screen
+        """Draw the drone in the screen.
 
-            Args:
-                screen (Surface): Represent the screen
-                cell_size (int): the size of the box's zone
-                offset_x (int): Represent the x mouse pos
-                offset_y (int): Represent the y mouse pos
+        Args:
+            screen (Surface): Represent the screen
+            cell_size (int): the size of the box's zone
+            offset_x (int): Represent the x mouse pos
+            offset_y (int): Represent the y mouse pos
         """
         screen_x, screen_y = self.screen_pos(cell_size, offset_x, offset_y)
 

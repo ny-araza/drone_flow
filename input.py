@@ -1,3 +1,5 @@
+"""Take the input and store it."""
+
 import os
 from error import ParseError
 from utils import Utils
@@ -5,19 +7,20 @@ from color import Color
 
 
 class Input:
-    """Represent the maps choosen function
+    """Represent the maps choosen function.
 
-        Attributes:
-            map_filder (str): the path of the maps folder
+    Attributes:
+        map_filder (str): the path of the maps folder
     """
+
     def __init__(
             self,
             map_folder: str = "maps",
             ):
-        """The contructor of Input class
+        """Represent the contructor of Input class.
 
-            Args:
-                map_folder (str): the path of the maps folder
+        Args:
+            map_folder (str): the path of the maps folder
         """
         self.map_folder: str = map_folder
         self.sub_folder: list[str] = self.get_subfolders(map_folder)
@@ -28,10 +31,10 @@ class Input:
     def display_map_choice(
             sub_folder: list[str]
             ) -> None:
-        """Show the map choice from map folder
+        """Show the map choice from map folder.
 
-            Args:
-                sub_folder (list[str]): List of all the subfolder
+        Args:
+            sub_folder (list[str]): List of all the subfolder
         """
         for i in range(len(sub_folder)):
             print(i, end=" ")
@@ -43,10 +46,10 @@ class Input:
 
     @staticmethod
     def get_subfolders(path: str) -> list[str]:
-        """Get the subfolder of one folder
+        """Get the subfolder of one folder.
 
-            Args:
-                path (str): The folder to get the subfolder
+        Args:
+            path (str): The folder to get the subfolder
         """
         sub_folder = []
         with os.scandir(path) as d:
@@ -59,14 +62,14 @@ class Input:
             user_choice: str,
             sub_folder: list[str]
             ) -> int:
-        """Get the user choice of each maps list
+        """Get the user choice of each maps list.
 
-            Args:
-                user_choice (str): The input from the user
-                sub_folder (str): The subfolder list
+        Args:
+            user_choice (str): The input from the user
+            sub_folder (str): The subfolder list
 
-            Returns:
-                the user_choice (int)
+        Returns:
+            the user_choice (int)
         """
         try:
             choice = int(user_choice)
@@ -77,9 +80,7 @@ class Input:
             return -1
 
     def choose_level(self) -> None:
-        """Display the choose map in the terminal and take the user choice
-        """
-
+        """Display the choose map in the terminal and take the user choice."""
         print()
         print("\nAll the map:\n")
         if not os.path.isdir(self.map_folder):
@@ -105,6 +106,7 @@ class Input:
                     break
 
     def select_map_path(self) -> None:
+        """Select the map from maps folder."""
         print(
             "\nThis is all the available "
             f"map for ({self.map_choosen})\n"

@@ -1,7 +1,16 @@
+"""Color palette for vizual representation."""
+
 from typing import Any
 
 
 class Color:
+    """Represent all color for vizualizer.
+
+    Attrs:
+        color_rgb = Dict that contain a color
+        for his key and tuple (RGB) for value
+    """
+
     color_rgb: dict[str, Any] = {
         "RED":       (255, 0, 0),
         "BLUE":      (0, 0, 255),
