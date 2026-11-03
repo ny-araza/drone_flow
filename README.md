@@ -20,15 +20,6 @@ For zone-type management, I store the number of drones during a given turn *t* i
 
 To construct a drone's path, I store each movement in a dictionary, using the current zone as the key and the destination as the value.
 
-### Complexity of the algorithm
-My algo have a *O( n T d C Log ( n T d ) )* <br>
-With:
-<ul>
-    <li>n: number of drone</li>
-    <li>T: number total of possible turn to reach the endzone</li>
-    <li>d: number of neighbors in a zone</li>
-    <li>heappush/heappop: O(Log(n T d))</li>
-</ul>
 
 ### Optimisation
 Before, I used a simple list to store a drone's possible movements; each time, I would call a sort function to find the minimum value, which was not efficient in terms of performance.
