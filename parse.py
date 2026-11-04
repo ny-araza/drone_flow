@@ -236,7 +236,7 @@ class Parse:
                     )
         else:
             raise ParseError(
-                f"{map_path}: Line: {line}{name} is not an unique zone name"
+                f"{map_path}: Line: {line} {name} is not an unique zone name"
             )
 
     def _check_key_metadata(self, keys: list[str]) -> bool:
@@ -556,7 +556,7 @@ class Parse:
                     if not zone1.name:
                         raise ParseError(
                             f"{map_path}: Line {line} "
-                            "The {z1} is not in zone list"
+                            f"The {z1} is not in zone list"
                         )
 
                     for zone in self.list_zones:
@@ -567,7 +567,7 @@ class Parse:
                     if not zone2.name:
                         raise ParseError(
                             f"{map_path}: Line {line} "
-                            "The {z2} is not in zone list"
+                            f"The {z2} is not in zone list"
                         )
 
                     if zone1.name == zone2.name:
@@ -575,7 +575,7 @@ class Parse:
                             f"{map_path}: "
                             f"Line {line} "
                             f"Conenction ({zone1.name},"
-                            "{zone2.name}) is not allowed"
+                            f"{zone2.name}) is not allowed"
                         )
 
                     connection: Connection = Connection(
