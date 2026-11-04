@@ -7,26 +7,27 @@ INSTALLED = .installed
 
 all:install
 
-run:
+run: $(INSTALLED)
 	@$(PY_VENV) main.py $(ARGS)
 
-run-folder:
+run-folder: $(INSTALLED)
 	@$(PY_VENV) main.py --folder $(ARGS)
 
 install:
 	@python -m venv $(VENV)
 	@$(PY_VENV) -m pip install uv
 	@uv sync --python 3.11
+	@touch $(INSTALLED)
 
 debug:
 	@$(PY_VENV) -m pdb main.py
 
-lint:
+lint: $(INSTALLED)
 	@$(PY_VENV) $(VENV)/bin/flake8 . --exclude=.venv && $(PY_VENV) $(VENV)/bin/mypy . --warn-return-any \
 		--warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs \
 		--check-untyped-defs --exclude .venv/
 
-lint-strict:
+lint-strict: $(INSTALLED)
 	@$(PY_VENV) $(VENV)/bin/flake8 . --exclude=.venv && $(PY_VENV) $(VENV)/bin/mypy --install-types && \
 		$(PY_VENV) $(VENV)/bin/mypy . --strict  --exclude .venv/
 
