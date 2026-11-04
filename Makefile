@@ -6,16 +6,13 @@ INSTALLED = INSTALLED
 
 all:install
 
-$(INSTALLED):
-	@touch $(INSTALLED)
-
-run: install
+run:
 	@$(PY_VENV) main.py $(ARGS)
 
-run-folder: install
+run-folder:
 	@$(PY_VENV) main.py --folder $(ARGS)
 
-install: $(INSTALLED)
+install:
 	@python -m venv $(VENV)
 	@$(PY_VENV) -m pip install uv
 	@uv sync --python 3.11
