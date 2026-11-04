@@ -1,6 +1,6 @@
 *This project has been created as part of the 42 curriculum by ny-araza*
 
-# DESCRIPTION
+# Description
 
 The "fly-in" project involves simulating drones to find the shortest path from point A to point B. The graph is weighted, A default zone costs 1 to travel to from a given point, whereas a restricted zone costs 2. Regarding connections, a connection may limit the number of drones passing through it.
 
@@ -64,7 +64,7 @@ D1-goal
 At t1, the drone moves toward waypoint 1.
 At t2, it moves toward the goal.
 
-# INSTRUCTION
+# Instructions
 
 ```bash
     make
@@ -110,7 +110,7 @@ At t2, it moves toward the goal.
     # Reset all dependencies
 ```
 
-# RESSOURCES
+# Resources
 
 ### Articles and tutorials
 <ul>
