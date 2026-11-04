@@ -337,8 +337,6 @@ class Parse:
                             )
 
                     temp_value = value.split("[")
-                    hash_comment = value.split("#")
-                    temp_value = hash_comment[0].split("[")
 
                     if len(brackets_test) > 1:
                         if len(temp_value[0].split(" ")) != 5:
@@ -346,12 +344,6 @@ class Parse:
                                 f"{map_path}: "
                                 f"Line {line} Each line must "
                                 "be separated by one space"
-                            )
-                        if not hash_comment[0].strip().endswith("]"):
-                            raise ParseError(
-                                f"{map_path}: "
-                                f"Line {line} Metadata must "
-                                "be inside brackets [...]"
                             )
 
                     basedata = temp_value[0].strip(" ").split(" ")
