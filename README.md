@@ -78,22 +78,26 @@ At t2, it moves toward the goal.
 
 ```bash
     make run
-    # run the program with the default map (01_linear_path.txt)
+    # run the program with the default map (01_linear_path.txt) 
+    # NB: Need to make first
 ```
 
 ```bash
     make run-folder ARGS=maps # the folder maps
     # run the program with the maps folder
+    # NB: Need to make first
 ```
 
 ```bash
     make lint
     # Check the mypy and the flake8
+    # NB: Need to make first
 ```
 
 ```bash
     make lint-strict
     # Check the mypy in strict-mode
+    # NB: Need to make first
 ```
 
 ```bash
