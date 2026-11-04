@@ -12,7 +12,7 @@ $(INSTALLED):
 run: install
 	@$(PY_VENV) main.py $(ARGS)
 
-run-folder:
+run-folder: install
 	@$(PY_VENV) main.py --folder $(ARGS)
 
 install: $(INSTALLED)
