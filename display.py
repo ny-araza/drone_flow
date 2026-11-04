@@ -206,7 +206,7 @@ class Display:
         self.screen = pg.display.set_mode((self.width, self.height))
 
         list_drones: list[Drone] = [
-            Drone(start_zone.x, start_zone.y, "./drone_50x50.png")
+            Drone(start_zone.x, start_zone.y, "./images/drone_50x50.png")
             for _ in range(self.parse.nb_drones)
         ]
 
