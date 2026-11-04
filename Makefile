@@ -1,38 +1,39 @@
 VENV=.venv
 PY_VENV=$(VENV)/bin/python
-INSTALLED = .installed
+INSTALLED = INSTALLED
 
-
-.PHONY: all install_package run run-folder install lint lint-strict clean fclean
+.PHONY: all run run-folder install lint debug lint-strict clean fclean
 
 all:install
 
-run: $(INSTALLED)
+$(INSTALLED):
+	@touch $(INSTALLED)
+
+run: install
 	@$(PY_VENV) main.py $(ARGS)
 
-run-folder: $(INSTALLED)
+run-folder:
 	@$(PY_VENV) main.py --folder $(ARGS)
 
-install:
+install: $(INSTALLED)
 	@python -m venv $(VENV)
 	@$(PY_VENV) -m pip install uv
 	@uv sync --python 3.11
-	@touch $(INSTALLED)
 
 debug:
 	@$(PY_VENV) -m pdb main.py
 
-lint: $(INSTALLED)
+lint:
 	@$(PY_VENV) $(VENV)/bin/flake8 . --exclude=.venv && $(PY_VENV) $(VENV)/bin/mypy . --warn-return-any \
 		--warn-unused-ignores --ignore-missing-imports --disallow-untyped-defs \
 		--check-untyped-defs --exclude .venv/
 
-lint-strict: $(INSTALLED)
+lint-strict:
 	@$(PY_VENV) $(VENV)/bin/flake8 . --exclude=.venv && $(PY_VENV) $(VENV)/bin/mypy --install-types && \
 		$(PY_VENV) $(VENV)/bin/mypy . --strict  --exclude .venv/
 
 clean:
-	@rm -rf __pycache* .mypy_cache
+	@rm -rf __pycache* .mypy_cache .pytest_cache
 
 fclean: clean
 	@rm -rf $(VENV)
