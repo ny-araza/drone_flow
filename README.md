@@ -22,14 +22,11 @@ To construct a drone's path, I store each movement in a dictionary, using the cu
 
 
 ### Optimisation
-Before, I used a simple list to store a drone's possible movements; each time, I would call a sort function to find the minimum value, which was not efficient in terms of performance.
-I then replaced it with a heap—a structure that sorts itself upon every insertion (push). It places the smallest element at the top of the tree, making it easy to retrieve the minimum and resulting in faster execution.
+To prevent drones from crossing a zone one at a time, even though the zone and the connection can hold several drones at once (which costs extra turns), I added a condition. It checks whether the current zone has the same priority as the next one, and if so, stores that move as a possible option in the heap.
 
 ### Visual representation features
 
-For the graphical representation, I have included the number of turn per drone,
-the minimum number of turn across all drones,
-and the total number of turn required for all drones to reach their destination.
+For the graphical representation, I have included the number of turn per drone
 The user can also display and hide the zone's name and drone's name.
 
 The user can zoom and move the map using <+> <-> keys or using the moulette. This ensures the map is displayed properly when it fills the entire screen.
