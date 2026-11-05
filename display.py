@@ -214,13 +214,13 @@ class Display:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     running = False
-
                 elif event.type == pg.KEYDOWN:
                     if event.key in (pg.K_KP_MINUS, pg.K_MINUS):
                         self._zoom(-ZOOM_STEP)
                     elif event.key in (pg.K_KP_PLUS, pg.K_PLUS):
                         self._zoom(ZOOM_STEP)
-
+                    elif event.key == pg.K_ESCAPE:
+                        running = False
                     elif event.key == pg.K_r:
                         restart = True
 
