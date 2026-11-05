@@ -610,3 +610,13 @@ class Parse:
                             "is already declared"
                         )
                     self.list_connections.append(connection)
+        if cpt_start_end["start"] == 0:
+            raise ParseError(
+                f" {map_path}:"
+                "No start-hub found"
+            )
+        if cpt_start_end["end"] == 0:
+            raise ParseError(
+                f" {map_path}:"
+                "No end-hub found"
+            )
