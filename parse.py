@@ -65,7 +65,7 @@ class Parse:
         Returns:
             valid or not valid
         """
-        try:
+        try:                
             max_drones = metadata_dict.get("max_drones", None)
             if max_drones:
                 n = int(max_drones)
@@ -254,6 +254,28 @@ class Parse:
                 return False
         return True
 
+    def check_zone_name(
+            self, ligne: str, 
+            map_path: str, line: int
+            ) -> str:
+        tmp = ligne.split(":")
+        if len(tmp) != 2:
+            raise ParseError(
+                f"{map_path}: "
+                f"Line {line} "
+                "One single ':' "
+                "per line must be present in the map file"
+            )
+        key, value = tmp
+        new_tmp = ligne
+        if key != "nb_drones":
+            base = value.split()
+            if "#" in base[0]:
+                base[0] = " " + base[0].replace("#", "_hashtag_")
+                tmp[1] = " ".join(base)
+                new_tmp = ":".join(tmp)
+        return new_tmp
+
     def parse(self, data: str, map_path: str, width: int, height: int) -> None:
         """Check if the map is valid.
 
@@ -279,6 +301,7 @@ class Parse:
         for tmp in temp:
             line = temp.index(tmp) + 1
             if not tmp.startswith("#") and tmp:
+                tmp = self.check_zone_name(tmp, map_path, line)
                 hash_temp = tmp.split("#")
                 item = tmp.split(":")
                 item = hash_temp[0].strip().split(":")
@@ -290,6 +313,7 @@ class Parse:
                         "per line must be present in the map file"
                     )
                 key, value = item
+                value = value.replace("_hashtag_", "#")
                 if not is_nb_drones and key == "nb_drones":
                     try:
                         self.nb_drones = int(value)
@@ -323,7 +347,6 @@ class Parse:
                         )
 
                     brackets_test = value.split("[")
-
                     if len(brackets_test) > 1:
                         cpt = 0
                         for c in value:
@@ -337,7 +360,6 @@ class Parse:
                             )
 
                     temp_value = value.split("[")
-
                     if len(brackets_test) > 1:
                         if len(temp_value[0].split(" ")) != 5:
                             raise ParseError(
@@ -345,7 +367,6 @@ class Parse:
                                 f"Line {line} Each line must "
                                 "be separated by one space"
                             )
-
                     basedata = temp_value[0].strip(" ").split(" ")
 
                     if len(basedata) != 3:
